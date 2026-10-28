@@ -4,6 +4,7 @@ The durable record. Newest checkpoint at the top. Each entry is written to be
 readable without the conversation it came from.
 
 ## Checkpoints
+1. **2026-10-28 - The goal is set: the virtual chassis** (below)
 1. **2026-10-24 - MATLAB was never the obstacle** (below)
 1. **2026-10-24 - Physics added, and it overturned a conclusion** (below)
 1. **2026-10-24 - The whole project in plain language** (below)
@@ -18,6 +19,117 @@ readable without the conversation it came from.
 3. **2026-10-20 — The target is a universal chassis**
 4. **2026-10-20 — How we got here, and what HostMatch is**
 5. **2026-10-17 — The big database does not have what we needed**
+
+---
+
+# 2026-10-28 — The goal is set, and the test that would falsify it is feasible
+
+Records: [`protocol/goal-definition-v1.md`](../protocol/goal-definition-v1.md),
+[`reports/03-validation-set-feasibility.md`](../reports/03-validation-set-feasibility.md).
+
+## The goal, decided
+
+Three candidates had been named: a specification a human lab reproduces, a tool
+driving an autonomous lab, and the virtual chassis as the deliverable itself.
+
+**They are not alternatives. They are a ladder** — goals 1 and 2 are
+applications of goal 3, because the specification a lab or a robot receives is
+what the virtual chassis emits.
+
+**Decided: the virtual chassis is the project.** Goal 2 is a design constraint,
+by emitting machine-executable output from the start. Goal 1 is eventual
+validation, not a dependency.
+
+The deciding argument is accountability: **it is the only one the project owner
+can falsify alone**, against the literature, at no cost, within months. The
+other two outsource the verdict to a facility nobody here has.
+
+**And the project's own evidence argues against goal 1 specifically.**
+Architecturally similar scFvs diverged under identical engineering, and a single
+specification handed over once is exactly the form that result threatens.
+
+## The danger, named
+
+A model of an organism nobody builds can be refined indefinitely without being
+shown wrong. **That failure is comfortable and it is fatal.** The guard is a
+retrospective test: run the tool blind against published yeast expression
+campaigns and ask whether it names the modifications those campaigns needed.
+
+## The feasibility check, run before committing
+
+Sample of **40 abstracts**, keyword-selected, scored by reading.
+
+| | Roughly |
+|---|---|
+| Names a specific protein | almost all |
+| Names a specific modification, at gene resolution | almost all |
+| Quantitative outcome in the abstract | about 1 in 4 |
+
+**(protein, modification) pairs are extractable at scale.** Outcomes usually
+need full text, which raises cost but does not block the test.
+
+## The find that changes how the set should be built
+
+**The literature contains cases where the same modification helped one protein
+and not another.** At least four in forty:
+
+- *"Overexpression of binding protein and disruption of the PMR1 gene
+  synergistically stimulate secretion of **bovine prochymosin but not plant
+  thaumatin**"*
+- *"**Protein disulfide isomerase, but not binding protein**, overexpression
+  enhances secretion of a **non-disulfide-bonded protein**"*
+- *"**Contrasting** secretory processing"* — BPTI versus scFv D1.3, same cell
+- the Pichia scFv divergence result already on file
+
+**These are the cases that would actually falsify the chassis**, because they
+test discrimination rather than recall. A tool that recommends PDI for
+everything scores well on successes and fails completely here. **The set should
+be built around them deliberately.**
+
+The second one is a direct hit on a rule currently in the code: **PDI improves
+secretion of a protein with no disulfide bonds.** The chassis fires its
+disulfide capability on cysteine count, and
+[`reports/02-feature-validation.md`](../reports/02-feature-validation.md)
+already caught that rule misfiring on seven proteins. The literature says the
+relationship is not the one the tool assumes.
+
+## The limitation that shapes what the test can claim
+
+**Papers report what worked. They rarely report what was tried and failed.**
+
+- **Recall is measurable** — the tool says humanised glycans, the paper says
+  they humanised the glycans.
+- **Precision is mostly not** — the tool says chaperone, the paper is silent,
+  and we cannot tell a false positive from something nobody tried.
+
+**The test can show the tool misses things. It cannot cleanly show the tool
+over-prescribes.** Any score must say which it is.
+
+## Decisions recorded
+
+| Decision | Against | Why |
+|---|---|---|
+| The virtual chassis is the deliverable | A wet-lab spec, or an autonomous-lab system | The only one falsifiable by the owner alone, at no cost, within months |
+| Emit machine-executable output from the start | Designing the output format later | Cheap now, expensive to retrofit, keeps the autonomous-lab goal reachable |
+| Check feasibility before building the set | Building it and finding out | A test that cannot be made to work would have cost weeks |
+| Build the set around differential cases | Collecting successes by keyword | Successes test recall; only differential cases test discrimination |
+| Report recall and precision separately | A single accuracy number | Publication bias makes precision uninterpretable |
+
+## Not done
+
+- **No validation set exists.** Feasibility only.
+- **The 40-abstract sample is not random** — both searches selected for papers
+  reporting engineering, so the coverage figures are an **upper bound**.
+- **Scoring was by reading, not by script**, so it is not reproducible the way
+  the UniProt validation is.
+- **No full texts retrieved.** Extractability of outcomes from full text is
+  assumed.
+- **Older papers dominate the secretion sample**, several from the 1990s, across
+  three decades of differing strains and assays.
+- **The blind condition needs enforcing.** Predictions must be frozen before the
+  papers are read, or the test is worthless.
+- No protocol output format has been designed, so the goal-2 design constraint
+  is a statement of intent and nothing more.
 
 ---
 
