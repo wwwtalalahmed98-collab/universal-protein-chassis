@@ -4,6 +4,7 @@ The durable record. Newest checkpoint at the top. Each entry is written to be
 readable without the conversation it came from.
 
 ## Checkpoints
+1. **2026-11-03 - Everything so far, in plain language** (below)
 1. **2026-10-28 - The goal is set: the virtual chassis** (below)
 1. **2026-10-24 - MATLAB was never the obstacle** (below)
 1. **2026-10-24 - Physics added, and it overturned a conclusion** (below)
@@ -19,6 +20,199 @@ readable without the conversation it came from.
 3. **2026-10-20 — The target is a universal chassis**
 4. **2026-10-20 — How we got here, and what HostMatch is**
 5. **2026-10-17 — The big database does not have what we needed**
+
+---
+
+# 2026-11-03 — Everything so far, in plain language
+
+Not new work. An account of the whole project for rereading cold, replacing the
+one written on 2026-10-24, which is now out of date in three important ways.
+
+## 1. Where we are
+
+**We have a working model of a yeast that does not exist, software that queries
+it, and — as of this week — a goal we can actually fail at.**
+
+## 2. What this project is for
+
+You want **one organism that can manufacture any protein**, instead of a
+different custom-built organism for every product, which is how the field works
+today.
+
+**You are not building that organism. You are building the thing that specifies
+it.** As of this week that is decided and written down: the deliverable is the
+**virtual chassis** — a model others can query, argue with and build from.
+
+## 3. Why this step
+
+Three weeks of work had produced a tool that looked authoritative and had never
+been checked against anything. **The risk was not that it was wrong. The risk
+was that it was wrong and we would never find out**, because a model of an
+organism nobody builds can be polished forever without being contradicted.
+
+Everything since has been about making this project capable of being proven
+wrong.
+
+## 4. What we actually did
+
+**Think of a kitchen fitted out to cook any dish.** The chassis is the kitchen,
+the capabilities are the equipment, the protein is the recipe.
+
+In order:
+
+1. Turned "makes anything" into a **checklist of 37 abilities**.
+2. Found which abilities **cannot coexist** — some chemistry needs oxygen,
+   other chemistry is destroyed by it.
+3. Asked whether one cell could **afford** them all. Not at once.
+4. Picked an organism: **baker's yeast**. The rules rejected every bacterium.
+5. You narrowed it to **proteins**: 37 became 22, of which yeast has 17.
+6. You said the tool **is** the chassis, so we wrote the organism down as a data
+   file and built code that reads a protein and queries it.
+7. Built a **simulator** you can click through.
+8. **Tested it** against curated biology.
+9. Added **physics**.
+10. Discovered the blocker we had been worrying about **did not exist**.
+11. **Set the goal**, and checked the test that would disprove it is possible.
+
+## 5. The three things we believed that turned out to be wrong
+
+**This is the real story of the last two weeks.** Each was stated confidently,
+each was load-bearing, and each was found by checking rather than by thinking
+harder.
+
+### Wrong 1 — "the cell has a 40% budget you can spend up to"
+
+We had a measured number: yeast tolerates about 40% of its protein being
+foreign. We treated it as a budget — stay under it and you are fine.
+
+**In the kitchen: we thought 40% of the floor was free, so fill it.**
+
+The growth laws say otherwise. The more equipment you cram in, the slower the
+cook moves. **Fill it to the limit and nothing comes out at all**, because what
+you harvest is how much each cell makes *times* how fast cells multiply.
+
+**The best point is half the limit — 20%, not 40%.** At 40% the yield is zero.
+A conclusion this project held for weeks, overturned on first contact with the
+theory.
+
+### Wrong 2 — "we need MATLAB, and that blocks us"
+
+The published yeast secretion model says it needs MATLAB, an expensive
+commercial licence. We recorded this across three documents as **the central
+obstacle to the project**.
+
+**Nobody had opened the repository to look.**
+
+MATLAB is needed to **build** those models. It is not needed to **use** them.
+The finished models are published as plain data files under a permissive
+licence. **It is a 1.6 MB download, it opens in free software, and it solved in
+six seconds.**
+
+**In the kitchen: we thought we needed an expensive licence to read the
+blueprint. The blueprint was already printed and sitting in the public folder.
+The licence is only needed to redraw it.**
+
+That model contains **805 glycosylation reactions, 6,646 folding reactions, 63
+disulfide reactions** — exactly the machinery we need to put real numbers on the
+five things our chassis has to add.
+
+### Wrong 3 — "narrowing to proteins is just a scope cut"
+
+When you narrowed from "any product" to "any protein", two of the four
+architectural rules the project had derived **evaporated**, because they existed
+only to cope with the wider problem. The hardest conflict we had solved stopped
+being relevant.
+
+**A good clarification destroyed some of our best work, and that was correct.**
+
+## 6. What you have now
+
+**Runs today:**
+
+- `chassis/chassis-v1.json` — the kitchen, written down: 22 abilities, which
+  yeast has, the 5 to install, and a list of what it cannot tell you.
+- `scripts/chassis_resolve.py` — a protein in, its requirements out.
+- `scripts/validate_features.py` — the test, scored against curated biology.
+- `scripts/growth_coupling.py` — the physics that corrected the budget.
+- `scripts/pcsec.py` — loads and solves the real secretion model, no MATLAB.
+- `sim/chassis-sim.html` — the clickable simulator, published online.
+
+**Written, not built:** 11 documents in `protocol/` — the reasoning, each
+ending in what it does not know. Five of the six physics layers are specified
+and unimplemented.
+
+## 7. The goal, now decided
+
+Three goals had been floating: a spec a human lab builds, a system that drives a
+robot lab, or the virtual chassis itself.
+
+**They are not alternatives — they are a ladder.** The other two need the
+chassis to exist first, because the instructions either one receives are what
+the chassis emits.
+
+**Decided: the virtual chassis is what you are accountable for.** It is the only
+one you can fail at alone, at no cost, within months. The others hand the
+verdict to a lab or a robot you do not have.
+
+**And the test that would prove it wrong is possible.** Hundreds of papers state
+what engineering a protein actually needed. Run the tool blind against them.
+If it does not name what those campaigns found necessary, the project is wrong
+and you will know in months.
+
+**The cases that matter are the ones where the same fix helped one protein and
+not another.** We found four in a sample of forty. Those test whether the tool
+*discriminates* or merely pattern-matches — and one of them lands directly on a
+rule already in our code.
+
+## 8. Decisions made, and why
+
+| Chose | Chose against | Why |
+|---|---|---|
+| The virtual chassis as the deliverable | A wet-lab spec; a robot-lab system | The only one you can falsify alone |
+| Proteins only | Any biotech product | Your call; cut the problem nearly in half |
+| Physics before more features | More rules | The first layer found a live error |
+| Consume the published models | Buying MATLAB; porting to Octave | They were already usable |
+| Check the test was possible first | Building the set and finding out | Would have cost weeks |
+| Keep every correction visible | Tidying the errors away | The corrections are the most useful part |
+
+## 9. Jargon decoder
+
+- **Chassis** — the host cell everything is built into. The kitchen.
+- **Capability** — one ability the cell needs. One appliance.
+- **Proteome budget** — the cell's total protein capacity. Floor space.
+- **Growth law** — the measured rule that the more foreign protein a cell makes,
+  the slower it grows.
+- **Glycosylation** — sugar chains on a protein. Many human drugs fail without
+  them, and yeast attaches the wrong kind.
+- **Disulfide bond** — a chemical staple holding a protein's shape.
+- **pcSecYeast** — the published yeast secretion model. Not ours. Now running on
+  your machine.
+- **Falsifiable** — able to be shown wrong. A goal that cannot be is not a goal.
+
+## 10. What is next, and what could go wrong
+
+**Next:** build the validation set — 30 to 50 proteins, weighted toward the
+cases where the same fix worked for one and failed for another. **Freeze the
+predictions before reading the answers**, or the test proves nothing.
+
+**The honest risks:**
+
+- **We can describe, not predict.** No titre, no yield, no probability of
+  success. The physics layers that would change this are five-sixths unbuilt.
+- **The chassis has never been built**, so every claim is about a hypothetical
+  organism.
+- **The important half is still untested.** We checked whether the tool *reads*
+  a protein correctly — 16 out of 16 inside its domain. We have never checked
+  whether its *advice* is any good.
+- **The test has a built-in blind spot.** Papers report what worked, not what
+  failed, so we can measure what the tool misses but not what it over-prescribes.
+- **Parameters, not equations, are the real work.** The physics is published;
+  the yeast-specific numbers are not assembled anywhere.
+- **Most of the theory is bacterial and our chassis is yeast.** Every transfer
+  is an assumption.
+- **And a published result says the premise has a ceiling:** two near-identical
+  antibody fragments behaved completely differently under identical engineering.
+  More physics does not fix a problem that is not a physics problem.
 
 ---
 
