@@ -4,6 +4,7 @@ The durable record. Newest checkpoint at the top. Each entry is written to be
 readable without the conversation it came from.
 
 ## Checkpoints
+1. **2026-11-03 - The layers get a method, and the method indicts our own code** (below)
 1. **2026-11-03 - Everything so far, in plain language** (below)
 1. **2026-10-28 - The goal is set: the virtual chassis** (below)
 1. **2026-10-24 - MATLAB was never the obstacle** (below)
@@ -20,6 +21,208 @@ readable without the conversation it came from.
 3. **2026-10-20 — The target is a universal chassis**
 4. **2026-10-20 — How we got here, and what HostMatch is**
 5. **2026-10-17 — The big database does not have what we needed**
+
+---
+
+# 2026-11-03 — The layers get a method, and the method indicts our own code
+
+Records: [`protocol/layer-architecture-v1.md`](../protocol/layer-architecture-v1.md),
+[`protocol/data-sources-v1.md`](../protocol/data-sources-v1.md),
+[`params/parameters-v1.json`](../params/parameters-v1.json),
+[`scripts/params.py`](../scripts/params.py),
+[`scripts/elongation.py`](../scripts/elongation.py).
+
+## The instruction
+
+> *"we don't build this superficially we build this authentically backed by
+> every principle that is required not only based on sequence"*
+
+`theory-stack-v1.md` had already said **which** layers. It had not said how a
+layer stops being a document and becomes a layer. Without that, the stack grows
+by writing more prose, and the project's own warning comes true: *"a stack of
+models produces confident numbers with no more content than the rules they
+replaced — and that is worse than the rule matcher, because it looks
+authoritative."*
+
+## The answer: gates, not more equations
+
+**The equations are not the scarce thing.** Thermodynamic promoter models,
+growth laws, TASEP, flux balance analysis — all published, all copyable. The
+scarce things are the numbers that go into them and the honesty about what comes
+out.
+
+A layer counts as established when it passes five checks:
+
+| Gate | Requirement |
+|---|---|
+| **1. Equation** | The functional form is published and cited, not assembled here |
+| **2. Parameter** | Every constant registered with its organism, source and grade |
+| **3. Unit** | The output has a unit, or declares itself dimensionless and refuses conversion |
+| **4. Validation** | It recovers something known that it was not shown |
+| **5. Boundary** | The limits print in its own output, not in a separate document |
+
+And a composition rule: **a composed prediction carries the lowest grade of any
+input it used.** Stated as weaker than it sounds — this is weakest-link
+tracking, not error propagation, because most registered parameters have no
+uncertainty attached and this project will not invent a spread to make the
+arithmetic prettier.
+
+## Gate 2 made machine-checkable
+
+`params/parameters-v1.json` holds every number the tool uses, with the organism
+it was measured in, its source, and a grade:
+
+- **A** — measured in yeast, paper identified, uncertainty stated
+- **B** — measured in yeast or from a named database, source identified
+- **C** — measured in another organism and transferred, or a model constant
+  whose applicability to yeast is unchecked
+- **D** — no external source; chosen inside this project because the code needed
+  a number
+
+`scripts/params.py` raises rather than returning a default when a layer asks for
+an unregistered parameter.
+
+## What the audit found, which is the real result of the day
+
+**Of the 8 registered parameters inside `chassis_resolve.py` — the code that
+decides which engineered modules a protein needs — 6 are grade D.**
+
+| Parameter | Value | Grade |
+|---|---|---|
+| Kyte-Doolittle hydropathy scale | 20 values | B |
+| N-glycosylation sequon | N-X-S/T, X≠P | B |
+| Signal-peptide hydropathy threshold | 1.6 | **D** |
+| Signal-peptide window | 9 residues | **D** |
+| Transmembrane window | 19 residues | **D** |
+| Transmembrane hydropathy threshold | 1.6 | **D** |
+| N-terminal scan limit | 22 residues | **D** |
+| **Large-CDS module threshold** | **1000 residues** | **D** |
+
+**And 0 of 15 registered parameters are grade A.** Not one number in this
+project is a yeast measurement with an identified paper *and* a stated
+uncertainty.
+
+The last row is the clearest case. A protein over 1000 residues triggers
+`MOD-largecds`, a module someone would build in a laboratory. **The trigger is a
+round number with nothing behind it**, reported in exactly the same voice as the
+sequon scan, which was measured at 96% recall against UniProt.
+
+**Four load-bearing constants have a recorded quote and no identified paper** —
+the yeast and *E. coli* proteome ceilings, the single-protein ceiling, and the
+regulator count. A reader cannot verify them.
+
+That is what "superficial" looks like in practice, and it was invisible until
+the parameters were forced into one place.
+
+## Layer 1c built, and it passes all five gates
+
+`scripts/elongation.py` replaces capability A1 — currently the boolean *"codon
+usage compatible with host tRNA pool: native, confidence high"*, with the note
+*"yeast codon tables well characterised"*, which describes the literature rather
+than the protein in front of you.
+
+**Inputs, both registered:**
+
+- tRNA gene copy numbers per anticodon, **GtRNAdb sacCer3, 275 genes** (grade B).
+  Transcribed by hand, so the loader asserts the total reconciles with the 275
+  GtRNAdb reports independently in its own summary box. It does.
+- Wobble penalties from dos Reis et al. 2004, **read from the authors' own R
+  implementation** rather than retyped from the paper's prose (grade C).
+
+### Gate 4, satisfied by a result the model was not shown
+
+Given tRNA gene counts and wobble penalties and **no codon usage data
+whatsoever**, the model ranks arginine codons:
+
+> `AGA 0.677 > CGT 0.369 > AGG 0.278 > CGC 0.266 > CGG 0.062 > CGA 0.000`
+
+Yeast codon-usage tables independently report **AGA as the dominant arginine
+codon and CGA as the rarest**. The ordering fell out of the tRNA genes. That
+establishes the layer is wired up correctly. **It does not establish that the
+layer predicts yield**, and the module says so in its own output.
+
+### Gate 3 stopped something
+
+tAI is dimensionless. Converting it to codons per second needs a scaling
+constant this project does not have, **so the module prints no rate.** A rate
+would have looked more like physics and contained less.
+
+### The finding that connects two layers
+
+**The worst-served residue in yeast is cysteine** — best reachable weight 0.246
+across its two codons, only 4 tRNA genes in the whole genome.
+
+Cysteine is what disulfide bonds are made of, and **disulfide-bonded secreted
+therapeutics are the class this chassis is aimed at.** The protein family the
+design targets is built from the residue the host supplies worst, and codon
+optimisation cannot change it.
+
+Stated carefully: that is a property of the tRNA gene complement — a predicted
+pressure, not a measured penalty — and it has not been tested against real
+yields.
+
+### A new output the chassis could not produce before
+
+Design headroom. A protein's residues are fixed; its codons are a choice. For
+human preproinsulin the reachable range is **0.676 best to 0.093 worst, a factor
+of 7.25**. That is what encoding choice can move. It is not a predicted
+difference in titre.
+
+## Where the parameters come from, by data type
+
+`data-sources-v1.md` maps every layer to its sources across genomic, proteomic,
+transcriptional, translational, metabolic and circuits data, with one column
+that matters:
+
+**Three sources are BOUND — data actually in the repository. Roughly seventeen
+are NAMED and have not been accessed.** That ratio is the honest state of the
+project's data depth, and a long list of databases is not evidence of depth.
+
+Each bound source has already changed a conclusion: **GtRNAdb** produced the
+elongation layer, **UniProt** found the only two defects ever found in this
+tool, **pcSecYeastSpecies** killed the MATLAB blocker.
+
+Two needs have **no database at all**: yeast translation-initiation models
+(layer 1b, no model of standing exists) and context-dependent circuit
+performance (layer 3). Those are modelling gaps no retrieval closes. **There is
+no yeast parts database that reports performance as a function of cellular
+context** — treating a parts list as characterised physics is a specific way
+this project could look data-rich and be superficial.
+
+## Decisions recorded
+
+| Decision | Against | Why |
+|---|---|---|
+| Gate layers on provenance, not on having an equation | Implementing more layers | An unsourced layer looks identical to a sourced one in the output |
+| Registry refuses unregistered parameters | Documenting them in prose | Prose does not stop the next script from typing a number |
+| Grade inheritance for composed predictions | Full uncertainty propagation | Most parameters have no uncertainty; inventing one would be worse |
+| No threshold on the residue-cost table | A "poorly served" cutoff | A cutoff would itself be grade D, inside the layer built to prevent that |
+| Print no elongation rate | Scaling tAI to codons per second | The scaling constant is not registered |
+| Read the wobble constants from the authors' code | Retyping from the paper text | The code is what the method actually runs |
+| Mark unaccessed databases NAMED | One undifferentiated source list | Naming a database is not having the data |
+
+## What is not done
+
+- **Nothing consumes the new layer.** Capability A1 in `chassis-v1.json` still
+  reads *"native, confidence high"*. The quantity is computed; the chassis object
+  has not been rewired.
+- **Six of eight layers still have no parameters**, so they cannot be scored.
+- **Layer 2 fails Gate 4.** Growth coupling corrected an error inside this
+  project, which is not the same as recovering an external measured result.
+- **The six grade-D thresholds are still in the running code.** They are now
+  labelled, not fixed. SignalP and DeepTMHMM remain the replacements.
+- **No module cost extracted from pcSecYeast**, though it is on disk and solves.
+- **The elongation layer has no ribosome traffic.** A real TASEP would model
+  queueing behind slow codons; this is a per-codon weight with no interaction
+  between ribosomes, so it cannot predict a jam.
+- **tRNA modification is ignored**, summarised by one constant per pairing type.
+- **Gene copy number is a proxy for tRNA abundance**, not a measurement of it,
+  and abundance shifts with growth rate.
+- **The gates were written after the code and applied retrospectively.** The
+  honest test is whether the next layer is built to pass them from the start.
+- **Ribosome profiling is the Gate 4 validation this layer still needs** — an
+  external measurement of where elongation actually slows, rather than agreement
+  with codon-usage tables. It is named and not retrieved.
 
 ---
 

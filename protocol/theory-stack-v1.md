@@ -300,3 +300,78 @@ the secretory model without MATLAB.
 **Not done:** every other layer. No parameters have been collected for any of
 them. The chassis object still carries no measured module cost. The simulator
 still displays the uncorrected 40% ceiling.
+
+---
+
+## Addition 2026-11-03: the layers now have a method, and 1c is implemented
+
+The document above says *which* layers. It did not say how a layer stops being
+prose and becomes a layer. Two documents and a registry now answer that.
+
+**[`layer-architecture-v1.md`](layer-architecture-v1.md)** — the five gates a
+layer must pass: published equation, every parameter registered with its
+provenance, a declared unit (or a refusal to be converted), a validation against
+something it was not tuned to reproduce, and limits printed in its own output.
+Plus the composition rule: **a composed prediction carries the lowest grade of
+any input it used.**
+
+**[`data-sources-v1.md`](data-sources-v1.md)** — where the parameters live, by
+data type: genomic, proteomic, transcriptional, translational, metabolic,
+circuits. **Three sources are bound and in the repository. Roughly seventeen are
+named and have not been accessed.** That ratio is the honest state of the
+project's data depth.
+
+**[`../params/parameters-v1.json`](../params/parameters-v1.json)** — every number
+the tool uses, with organism, source and grade.
+[`../scripts/params.py`](../scripts/params.py) refuses to return an unregistered
+parameter.
+
+### What applying the gates to existing code revealed
+
+**Of the 8 registered parameters inside `chassis_resolve.py` — the code that
+decides which engineered modules a protein needs — 6 have no source at all.**
+Among them the threshold that triggers `MOD-largecds`, an engineered module
+someone would build in a laboratory, fired by a protein being longer than a
+round 1000 residues.
+
+**And 0 of 15 registered parameters are grade A.** No number in this project is
+a yeast measurement with an identified paper and a stated uncertainty.
+
+### Layer 1c is now implemented and passes all five gates
+
+[`../scripts/elongation.py`](../scripts/elongation.py) computes relative codon
+adaptiveness for *S. cerevisiae* from tRNA gene copy numbers (GtRNAdb sacCer3,
+275 genes, reconciled by checksum) and the published wobble penalties, following
+the method authors' own implementation rather than a retyping of their paper.
+
+**Gate 4 is satisfied by a result the model was not shown.** Given tRNA gene
+counts and wobble penalties and **no codon usage data whatsoever**, it ranks
+arginine codons `AGA > CGT > AGG > CGC > CGG > CGA`, with CGA effectively
+unreadable — which is what yeast codon-usage tables independently report.
+
+**Gate 3 stopped something.** The output is dimensionless. Converting it to
+codons per second needs a scaling constant this project does not have, so the
+module prints no rate. A rate would have looked more like physics and contained
+less.
+
+**The finding that connects two layers:** the worst-served residue in yeast is
+**cysteine** (best reachable weight 0.246 across its 2 codons, only 4 tRNA genes
+in the genome). Cysteine is what disulfide bonds are made of, and
+disulfide-bonded secreted therapeutics are the class this chassis targets. **The
+protein family the design aims at is built from the residue the host supplies
+worst, and codon optimisation cannot change it.** Stated carefully: that is a
+property of the tRNA gene complement, a predicted pressure and not a measured
+penalty, and it has not been tested against real yields.
+
+### Still not done
+
+- **Nothing consumes the new layer.** Capability A1 in `chassis-v1.json` still
+  reads *"native, confidence high"* with the note *"yeast codon tables well
+  characterised"*.
+- **Layer 2 fails Gate 4.** Growth coupling corrected an error inside this
+  project, which is not the same as recovering an external measured result.
+- **Six of eight layers have no parameters at all**, so they cannot be scored.
+- **No module cost extracted from pcSecYeast**, though the model is on disk and
+  solves.
+- The grades are judgements, and grade inheritance tracks the weakest link
+  rather than compounding uncertainty properly.

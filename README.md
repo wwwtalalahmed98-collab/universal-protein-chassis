@@ -26,6 +26,12 @@ python -I scripts/protein_scope.py
 
 # Reproduce the proteome budget arithmetic
 python -I scripts/proteome_budget.py
+
+# Provenance audit: every number the tool uses, graded by where it came from
+python -I scripts/params.py --audit
+
+# Theory-stack layer 1c: codon adaptiveness from the yeast tRNA gene pool
+python -I scripts/elongation.py
 ```
 
 No dependencies beyond the Python standard library.
@@ -68,6 +74,9 @@ that no larger model removes.
 |---|---|
 | `chassis/chassis-v1.json` | **The chassis object.** 22 capabilities, 5 engineered modules, 4 global constraints, provenance, and its own statement of what it cannot do |
 | `scripts/chassis_resolve.py` | Resolves a protein sequence against the chassis |
+| `params/parameters-v1.json` | **The parameter registry.** Every number the tool uses, with its organism, source and provenance grade A-D |
+| `scripts/params.py` | Registry loader. Refuses to return an unregistered parameter; `--audit` grades the lot |
+| `scripts/elongation.py` | Theory-stack layer 1c: codon adaptiveness from tRNA gene copy numbers |
 | `sim/chassis-sim.html` | Interactive simulation, same logic in JavaScript |
 | `protocol/` | The reasoning, one document per question, each ending in what it does not know |
 | `docs/PROJECT-STORY.md` | Durable record: every checkpoint, decision, and reversal, newest first |

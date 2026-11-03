@@ -1,0 +1,91 @@
+# tRNA gene copy numbers, Saccharomyces cerevisiae
+#
+# SOURCE      GtRNAdb (Genomic tRNA Database), Chan & Lowe, UCSC
+# GENOME      Scere3 / sacCer3
+# URL         https://gtrnadb.ucsc.edu/genomes/eukaryota/Scere3/
+# RETRIEVED   2026-11-03
+# METHOD      tRNAscan-SE predictions, as published by GtRNAdb
+#
+# HOW THIS FILE WAS MADE, STATED HONESTLY
+# This table was transcribed by hand from the "tRNA Gene Summary" HTML tables
+# on the page above. Hand transcription can introduce errors, so the loader
+# (scripts/params.py) asserts the total equals the 275 that GtRNAdb reports
+# independently in its own Overview box. That checksum catches a dropped or
+# mistyped count; it does not catch two errors that cancel.
+#
+# COLUMNS
+#   anticodon  tRNA anticodon, 5'->3', DNA alphabet
+#   aa         amino acid isotype
+#   genes      number of tRNA genes with that anticodon in sacCer3
+#
+# The codon an anticodon decodes by Watson-Crick pairing is the reverse
+# complement of the anticodon. Anticodons absent from the genome are listed
+# with 0 rather than omitted, because a zero is a modelling fact (that codon
+# must be read by wobble) and a missing row is only an absence of data.
+#
+# NOTE ON METHIONINE: GtRNAdb reports anticodon CAT as 5 initiator + 5
+# elongator. Only the 5 elongator genes are relevant to elongation. The value
+# below is the elongator count, 5, not the combined 10. This departs from the
+# raw page and is recorded in params/parameters-v1.json as a stated decision.
+anticodon	aa	genes
+AGC	Ala	11
+GGC	Ala	0
+CGC	Ala	0
+TGC	Ala	5
+ACC	Gly	0
+GCC	Gly	16
+CCC	Gly	2
+TCC	Gly	3
+AGG	Pro	2
+GGG	Pro	0
+CGG	Pro	0
+TGG	Pro	10
+AGT	Thr	11
+GGT	Thr	0
+CGT	Thr	1
+TGT	Thr	4
+AAC	Val	14
+GAC	Val	0
+CAC	Val	2
+TAC	Val	2
+AGA	Ser	11
+GGA	Ser	0
+CGA	Ser	1
+TGA	Ser	3
+ACT	Ser	0
+GCT	Ser	4
+ACG	Arg	6
+GCG	Arg	0
+CCG	Arg	1
+TCG	Arg	0
+CCT	Arg	1
+TCT	Arg	11
+AAG	Leu	0
+GAG	Leu	1
+CAG	Leu	0
+TAG	Leu	3
+CAA	Leu	10
+TAA	Leu	7
+AAA	Phe	0
+GAA	Phe	10
+ATT	Asn	0
+GTT	Asn	10
+CTT	Lys	14
+TTT	Lys	7
+ATC	Asp	0
+GTC	Asp	16
+CTC	Glu	2
+TTC	Glu	14
+ATG	His	0
+GTG	His	7
+CTG	Gln	1
+TTG	Gln	9
+AAT	Ile	13
+GAT	Ile	0
+TAT	Ile	2
+CAT	Met	5
+ATA	Tyr	0
+GTA	Tyr	8
+ACA	Cys	0
+GCA	Cys	4
+CCA	Trp	6
