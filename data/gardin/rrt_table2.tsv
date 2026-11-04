@@ -1,0 +1,109 @@
+# Ribosome residence time per codon, Saccharomyces cerevisiae
+#
+# SOURCE     Gardin J, Yeasmin R, Yurovsky A, Cai Y, Skiena S, Futcher B (2014)
+#            Measurement of average decoding rates of the 61 sense codons
+#            in vivo. eLife 3:e03735. doi:10.7554/eLife.03735
+# TABLE      Table 2, "Ribosome residence time at position 6 (A) and 5 (B)"
+# RETRIEVED  2026-11-04, from the PubMed Central full-text XML (PMC4371865)
+#            via NCBI efetch, parsed programmatically from the table markup.
+#
+# TO REGENERATE
+#   curl -L -o data/gardin/eLife03735.xml \n#     'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=4371865&rettype=xml'
+#   then extract table-wrap id="tbl2". The XML itself is gitignored as
+#   third-party bulk; this file is the part actually used.
+#
+# A DEFECT IN THE PUBLISHED TABLE
+#   Section A lists TCC twice, with different usage and RRT values, and
+#   lists no TCT. Serine is one codon short. The rows are left exactly as
+#   published. scripts/validate_elongation.py detects the duplicate and
+#   EXCLUDES both rows rather than inferring which was mislabelled.
+#
+# WHAT RRT IS
+#   Ribosome Residence Time: how long the ribosome lingers with a given codon
+#   at the measured position, relative to expectation. HIGHER RRT means the
+#   codon is decoded MORE SLOWLY. Section A is position 6, the A site, and is
+#   the one used here. Section B holds only the six codons the authors report
+#   at position 5 and is not used.
+#
+# WHY IT IS HERE
+#   This project's elongation layer predicts which codons the yeast tRNA pool
+#   serves poorly, from tRNA gene copy numbers alone. RRT is an independent
+#   positional measurement of decoding speed. The layer predicts adaptiveness
+#   should be NEGATIVELY correlated with residence time. See
+#   scripts/validate_elongation.py.
+#
+# COLUMNS
+#   section  A = position 6 (A site), B = position 5
+#   codon    sense codon, DNA alphabet
+#   aa       amino acid, as printed in the source table
+#   usage    codon usage frequency as printed in the source table
+#   rrt      ribosome residence time as printed in the source table
+#   p        p value as printed in the source table, asterisks retained
+section	codon	aa	usage	rrt	p
+A	CTC	Leu	5.4	1.89	*0.0001
+A	CCC	Pro	6.8	1.71	*0.0001
+A	GGG	Gly	6	1.61	*0.0001
+A	AGG	Arg	9.2	1.59	*0.0001
+A	ATA	Ile	17.8	1.57	*0.0001
+A	GGA	Gly	10.9	1.56	*0.0001
+A	TGG	Trp	10.4	1.53	*0.0001
+A	GTG	Val	10.8	1.52	*0.0001
+A	CGC	Arg	2.6	1.45	*0.0001
+A	CGA	Arg	3	1.45	*0.0008
+A	CGG	Arg	1.7	1.44	*0.0010
+A	TCG	Ser	8.6	1.43	*0.0001
+A	CCA	Pro	18.3	1.38	*0.0001
+A	ACA	Thr	17.8	1.35	*0.0001
+A	CCG	Pro	5.3	1.31	*0.0001
+A	GTA	Val	11.8	1.31	*0.0001
+A	GCA	Ala	16.2	1.28	*0.0001
+A	CCT	Pro	13.5	1.27	*0.0001
+A	TCA	Ser	18.7	1.26	*0.0001
+A	TAC	Tyr	14.8	1.25	*0.0001
+A	TAT	Tyr	18.8	1.25	*0.0001
+A	GAG	Glu	19.2	1.25	*0.0001
+A	CTA	Leu	13.4	1.25	*0.0001
+A	CTT	Leu	12.3	1.24	*0.0001
+A	TGC	Cys	4.8	1.23	*0.0001
+A	GGC	Gly	9.8	1.22	*0.0001
+A	CAG	Gln	12.1	1.15	*0.0002
+A	ACG	Thr	8	1.12	0.0069
+A	AGT	Ser	14.2	1.10	0.0060
+A	AGC	Ser	9.8	1.09	0.0213
+A	CAC	His	7.8	1.08	0.0098
+A	TTT	Phe	26.1	1.05	0.0529
+A	GAA	Glu	45.6	1.04	0.0538
+A	AGA	Arg	21.3	1.01	0.3014
+A	TTC	Phe	18.4	1.00	0.4955
+A	GCG	Ala	6.2	0.99	0.4650
+A	TCC	Ser	14.2	0.99	0.3341
+A	TTA	Leu	26.2	0.99	0.3166
+A	TCC	Ser	23.5	0.98	0.2249
+A	CAT	His	13.6	0.93	0.0188
+A	GGT	Gly	23.9	0.93	*0.0003
+A	ATG	Met	20.9	0.92	0.0027
+A	ATT	Ile	30.1	0.92	*0.0005
+A	TTG	Leu	27.2	0.92	*0.0001
+A	CTG	Leu	10.5	0.92	0.0139
+A	AAT	Asn	35.7	0.88	*0.0001
+A	AAA	Lys	41.9	0.88	*0.0003
+A	CGT	Arg	6.4	0.87	*0.0002
+A	CAA	Gln	27.3	0.87	*0.0001
+A	GCC	Ala	12.6	0.86	*0.0001
+A	GAC	Asp	20.2	0.85	*0.0001
+A	TGT	Cys	8.1	0.81	*0.0001
+A	GCT	Ala	21.2	0.81	*0.0001
+A	ATC	Ile	17.2	0.80	*0.0001
+A	ACT	Thr	20.3	0.78	*0.0001
+A	GAT	Asp	37.6	0.76	*0.0001
+A	AAC	Asn	24.8	0.76	*0.0001
+A	GTT	Val	22.1	0.75	*0.0001
+A	GTC	Val	11.8	0.75	*0.0001
+A	AAG	Lys	30.8	0.74	*0.0001
+A	ACC	Thr	12.7	0.70	*0.0001
+B	CCT	Pro	13.5	1.80	*0.0001
+B	CCC	Pro	6.8	1.48	*0.0001
+B	CCA	Pro	18.3	1.48	*0.0001
+B	AAT	Asn	35.7	1.39	*0.0001
+B	CGC	Arg	1.7	1.34	0.0070
+B	CCG	Pro	5.3	1.30	*0.0001

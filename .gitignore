@@ -29,3 +29,6 @@ Thumbs.db
 
 # downloaded third-party models, fetched by scripts/pcsec.py
 data/models/
+
+# downloaded third-party full-text XML, fetched on demand (see data/gardin/rrt_table2.tsv header)
+data/gardin/*.xml

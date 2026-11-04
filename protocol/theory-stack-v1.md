@@ -375,3 +375,49 @@ penalty, and it has not been tested against real yields.
   solves.
 - The grades are judgements, and grade inheritance tracks the weakest link
   rather than compounding uncertainty properly.
+
+---
+
+## Addition 2026-11-04: layer 1c passes gate 4 against external measurement
+
+The entry above recorded layer 1c passing gate 4 on the weak form of the test —
+reproducing the known arginine codon ordering. **The strong form has now been
+run against two published datasets, and it passes.** Full account in
+[`../reports/04-elongation-validation.md`](../reports/04-elongation-validation.md).
+
+**Per-codon decoding speed**, Gardin et al. 2014 eLife, ribosome residence time
+at the A site: **rho = −0.62, p = 2e-07 across 58 codons**, in the predicted
+direction. The two slowest codons measured in the cell, CTC and CCC, are two the
+model marks nearly unserved. **And it beats codon usage frequency, −0.62 against
+−0.54** — so the tRNA gene data earns its place over a predictor that needs no
+tRNA data at all.
+
+**Per-gene translation efficiency**, Weinberg et al. 2016 GEO GSE75897:
+**rho = +0.44 across 4,820 genes**, stable across swept expression cutoffs,
+beating a composition-only control (+0.26) and all 200 runs of a
+shuffled-weight null.
+
+### The result that constrains every later layer
+
+**Predicted spread between best and worst codon: about 27,000×. Measured spread:
+2.7×.**
+
+The model ranks codons usefully and overstates their differences by four orders
+of magnitude. CGA is the clearest case: no tRNA reads it Watson-Crick, so the
+model calls it unreadable, and the measurement finds it merely slow. **Wobble
+decoding works, just poorly, and gene copy number cannot see that.**
+
+This is the quantitative justification for Gate 3. Had the layer been allowed to
+emit codons per second, it would have produced confident numbers that were wrong
+by a factor of thousands. **Every layer added from here should be assumed to
+have the same disease until measured: ordering trustworthy, magnitude not.**
+
+### Gate scorecard, updated
+
+| Layer | Gates passed |
+|---|---|
+| **1c. Elongation** | **5 of 5, on external measurement** |
+| 2. Growth coupling | 4 of 5 — still no external validation |
+| all six others | not started, or no parameters |
+
+**One layer of eight is established. That is the honest count.**

@@ -32,6 +32,9 @@ python -I scripts/params.py --audit
 
 # Theory-stack layer 1c: codon adaptiveness from the yeast tRNA gene pool
 python -I scripts/elongation.py
+
+# Validate that layer against published ribosome profiling
+python -I scripts/validate_elongation.py
 ```
 
 No dependencies beyond the Python standard library.
@@ -77,6 +80,7 @@ that no larger model removes.
 | `params/parameters-v1.json` | **The parameter registry.** Every number the tool uses, with its organism, source and provenance grade A-D |
 | `scripts/params.py` | Registry loader. Refuses to return an unregistered parameter; `--audit` grades the lot |
 | `scripts/elongation.py` | Theory-stack layer 1c: codon adaptiveness from tRNA gene copy numbers |
+| `scripts/validate_elongation.py` | Tests that layer against measured yeast ribosome profiling |
 | `sim/chassis-sim.html` | Interactive simulation, same logic in JavaScript |
 | `protocol/` | The reasoning, one document per question, each ending in what it does not know |
 | `docs/PROJECT-STORY.md` | Durable record: every checkpoint, decision, and reversal, newest first |

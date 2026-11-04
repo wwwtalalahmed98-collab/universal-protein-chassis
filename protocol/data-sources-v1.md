@@ -173,3 +173,33 @@ data-rich.
 - **The missing-citation problem is not fixed here.** Four load-bearing constants
   still have a recorded quote and no identified paper. BioNumbers is named above
   as the likely fix and has not been tried.
+
+---
+
+## Addition 2026-11-04: two translational sources moved from NAMED to BOUND
+
+The translational layer named ribosome profiling as *"the Gate 4 validation this
+project could run without a laboratory"*. It has been run. See
+[`../reports/04-elongation-validation.md`](../reports/04-elongation-validation.md).
+
+| Source | Supplies | Status |
+|---|---|---|
+| **Gardin et al. 2014, eLife 3:e03735, Table 2A** | Ribosome residence time at the A site for each sense codon — a direct positional measurement of decoding speed | **BOUND** → [`../data/gardin/rrt_table2.tsv`](../data/gardin) |
+| **Weinberg et al. 2016, GEO GSE75897** | Ribosome-footprint density and mRNA abundance per gene | **BOUND** → [`../data/riboseq/`](../data/riboseq) |
+| **SGD S288C `orf_coding.fasta`** | Coding sequences for 6,039 yeast ORFs | **BOUND** → [`../data/sgd/`](../data/sgd) |
+
+**Six sources are now bound rather than three.** The headline results: codon
+adaptiveness predicts measured per-codon decoding speed at **rho = −0.62**, and
+beats codon usage frequency, which is the predictor that needs no tRNA data at
+all. Per-gene translation efficiency correlates at **+0.44** across 4,820 genes,
+surviving both a composition-only control and a 200-run permutation null.
+
+**And the honest half:** the model's predicted spread between best and worst
+codon is about **27,000×**, while the measured spread is **2.7×**. The ordering
+is informative and the magnitudes are not, which is the quantitative reason the
+layer refuses to emit a rate.
+
+**Still NAMED in this document and still needed:** tRNA modification data, which
+the CGA result points at directly — the model treats a codon with no
+Watson-Crick tRNA as unreadable, and the measurement shows wobble decoding
+working, just poorly.
