@@ -255,13 +255,14 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-fa
 </section>
 
 <section>
-  <div class="sechead"><h2>Proteome budget</h2><p>A sweep, not a prediction. No module's cost has been measured.</p></div>
+  <div class="sechead"><h2>Proteome budget</h2><p>40% is where yield reaches zero, not a budget. The useful target is half of it.</p></div>
   <div class="panel">
     <label class="opt" for="cost" style="display:block;margin-bottom:6px">Assumed cost per engineered module: <b class="mono" id="costOut">2.0%</b> of cell protein</label>
     <input type="range" id="cost" min="5" max="100" step="5" value="20">
     <div class="bar">
       <div class="fill" id="fill" style="width:0%"></div>
-      <div class="ceil" style="left:40%"><b>40% ceiling</b></div>
+      <div class="ceil" style="left:20%"><b>20% optimum</b></div>
+      <div class="ceil" style="left:40%"><b>40% zero yield</b></div>
     </div>
     <div class="scale"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100% of cell protein</span></div>
     <p class="readnum" id="budgetOut"></p>
@@ -272,11 +273,14 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <div class="limits">
     <h2>What this cannot tell you</h2>
     <ul>
-      <li><b>No titre, yield or probability of success.</b> The simulation step that would predict those needs a proteome-constrained metabolic model, which runs in MATLAB and is not wired in.</li>
-      <li><b>The budget bar is a sweep across an assumption.</b> Nobody has measured what any of these modules costs the cell, so the 40% ceiling cannot yet be checked against a real answer.</li>
+      <li><b>No titre, yield or probability of success.</b> The step that would predict those needs a proteome-constrained metabolic model. That model now loads and solves outside this page, but no module cost has been extracted from it, so nothing here is calibrated.</li>
+      <li><b>The budget bar is a sweep across an assumption.</b> Nobody has measured what any of these modules costs the cell, so the position on the bar is a what-if and not a result.</li>
+      <li><b>The growth curve is first-order.</b> Growth is taken to fall linearly with heterologous protein and reach zero at 40%. That shape is well supported in <i>E. coli</i> and much less tested in yeast, and the source says &ldquo;exceeding 40%&rdquo;, so the optimum shown is a lower bound.</li>
       <li><b>The signal peptide and transmembrane calls are hydropathy heuristics.</b> Real answers need SignalP and DeepTMHMM. They are marked in the readout.</li>
       <li><b>O-glycosylation and other modifications come back unknown, not zero.</b> They cannot be read off a sequence here.</li>
       <li><b>This chassis does not exist.</b> It is a base organism plus five proposed modules, each carrying published precedent rather than a validated construct.</li>
+      <li><b>Codon adaptiveness ranks codons and cannot give a rate.</b> It is computed from 275 yeast tRNA genes and agrees with measured per-codon decoding speed at &rho;&nbsp;=&nbsp;&minus;0.62. But its predicted spread between best and worst codon is about 27,000&times; where the measured spread is 2.7&times;, so no speed is shown. It is also validated only on native yeast genes, never on a foreign protein.</li>
+      <li><b>Only 1 of 22 capabilities has a quantitative layer behind it.</b> That is A1. The other 21 are categorical judgements, and six of the thresholds driving them have no published source at all.</li>
       <li><b>No validation against measured outcomes.</b> A published result reports that architecturally similar antibody fragments behave differently under identical engineering, so sequence alone has a ceiling no model removes.</li>
     </ul>
   </div>
@@ -284,13 +288,77 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-fa
 
 <footer>
   Capability set, conflicts, proteome arithmetic and organism choice: the protocol documents in this project.<br>
-  Chassis definition: chassis/chassis-v1.json &middot; same resolver logic as scripts/chassis_resolve.py<br>
-  External models referenced but not run: pcSecYeast (Chalmers) and pcSecYeastSpecies (Tsinghua), both MATLAB.
+  Chassis definition: chassis/chassis-v1.json, schema 1.1 &middot; same resolver logic as scripts/chassis_resolve.py<br>
+  Codon adaptiveness: tRNA gene copies from GtRNAdb (sacCer3), wobble penalties from dos Reis et al. 2004. Verified value for value against scripts/elongation.py.<br>
+  Validated against Gardin et al. 2014 (eLife) per-codon residence times and Weinberg et al. 2016 (GEO GSE75897) ribosome profiling.<br>
+  pcSecYeastSpecies (Tsinghua) loads and solves outside this page without MATLAB; no module cost has been extracted from it yet.
 </footer>
 </div>
 
 <script>
 const KD={A:1.8,R:-4.5,N:-3.5,D:-3.5,C:2.5,Q:-3.5,E:-3.5,G:-0.4,H:-3.2,I:4.5,L:3.8,K:-3.9,M:1.9,F:2.8,P:-1.6,S:-0.8,T:-0.7,W:-0.9,Y:-1.3,V:4.2};
+
+/* Theory-stack layer 1c, translation elongation.
+   tRNA gene copies per anticodon, S. cerevisiae (GtRNAdb, sacCer3). 270
+   elongator genes; the 5 initiator methionine genes are excluded because
+   initiator tRNA does not elongate. Mirrors params/trna-scerevisiae-gtrnadb-v1.tsv.
+   Wobble penalties from dos Reis et al. 2004, read from the authors' own code.
+   Verified to reproduce scripts/elongation.py value for value. */
+const TRNA={AGC:11,GGC:0,CGC:0,TGC:5,ACC:0,GCC:16,CCC:2,TCC:3,AGG:2,GGG:0,CGG:0,TGG:10,
+ AGT:11,GGT:0,CGT:1,TGT:4,AAC:14,GAC:0,CAC:2,TAC:2,AGA:11,GGA:0,CGA:1,TGA:3,ACT:0,GCT:4,
+ ACG:6,GCG:0,CCG:1,TCG:0,CCT:1,TCT:11,AAG:0,GAG:1,CAG:0,TAG:3,CAA:10,TAA:7,AAA:0,GAA:10,
+ ATT:0,GTT:10,CTT:14,TTT:7,ATC:0,GTC:16,CTC:2,TTC:14,ATG:0,GTG:7,CTG:1,TTG:9,AAT:13,GAT:0,
+ TAT:2,CAT:5,ATA:0,GTA:8,ACA:0,GCA:4,CCA:6};
+const S={gu:0.41,ic:0.28,ia:0.9999,ug:0.68};
+const AA1="FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
+const BASES="TCAG";
+const CODONS=[];
+for(const a of BASES)for(const b of BASES)for(const c of BASES)CODONS.push(a+b+c);
+const CODON_AA={}; CODONS.forEach((c,i)=>CODON_AA[c]=AA1[i]);
+const RC={A:"T",T:"A",G:"C",C:"G"};
+const revcomp=s=>[...s].reverse().map(b=>RC[b]).join("");
+
+function relAdapt(){
+  const t=CODONS.map(c=>TRNA[revcomp(c)]||0);
+  const p=[1,1,1,1,1-S.gu,1-S.ic,1-S.ia,1-S.ug];
+  const W=new Array(64).fill(0);
+  for(let i=0;i<64;i+=4){
+    W[i]  =p[0]*t[i]  +p[4]*t[i+1];   // NNT: exact INN, wobble GNN (G:U)
+    W[i+1]=p[1]*t[i+1]+p[5]*t[i];     // NNC: exact GNN, wobble INN (I:C)
+    W[i+2]=p[2]*t[i+2]+p[6]*t[i];     // NNA: exact UNN, wobble INN (I:A)
+    W[i+3]=p[3]*t[i+3]+p[7]*t[i+2];   // NNG: exact CNN, wobble UNN (U:G)
+  }
+  W[CODONS.indexOf("ATG")]=p[3]*t[CODONS.indexOf("ATG")];
+  const skip=new Set(["TAA","TAG","TGA","ATG"]);
+  const kept=CODONS.map((c,i)=>[c,W[i]]).filter(([c])=>!skip.has(c));
+  const mx=Math.max(...kept.map(([,v])=>v));
+  const w={}; kept.forEach(([c,v])=>w[c]=v/mx);
+  const nz=Object.values(w).filter(v=>v>0);
+  if(nz.length<Object.keys(w).length){
+    const gm=Math.exp(nz.reduce((s,v)=>s+Math.log(v),0)/nz.length);
+    for(const c in w) if(w[c]===0) w[c]=gm;
+  }
+  return w;
+}
+const WCODON=relAdapt();
+const BESTW={};
+for(const c in WCODON){const a=CODON_AA[c]; if(!(a in BESTW)||WCODON[c]>BESTW[a]) BESTW[a]=WCODON[c]}
+const WORSTW={};
+for(const c in WCODON){const a=CODON_AA[c]; if(!(a in WORSTW)||WCODON[c]<WORSTW[a]) WORSTW[a]=WCODON[c]}
+
+function codonRange(seq){
+  const best=[],worst=[];
+  for(const a of seq.toUpperCase()){
+    if(a==="M"||!(a in BESTW)) continue;
+    best.push(BESTW[a]); worst.push(WORSTW[a]);
+  }
+  if(!best.length) return null;
+  const gm=xs=>Math.exp(xs.reduce((s,v)=>s+Math.log(v),0)/xs.length);
+  const counts={};
+  for(const a of seq.toUpperCase()) if(a!=="M"&&a in BESTW) counts[a]=(counts[a]||0)+1;
+  const poorest=Object.keys(counts).sort((x,y)=>BESTW[x]-BESTW[y]).slice(0,3);
+  return {best:gm(best),worst:gm(worst),n:best.length,counts,poorest};
+}
 
 const CAPS=[
  {id:"A1",name:"Codon usage matched to host",status:"native",always:1},
@@ -349,7 +417,7 @@ function featuresOf(raw){
   let tm=0,i=sig?25:0;
   while(i<=n-19){ if(meanKD(seq.slice(i,i+19))>1.6){tm++;i+=19} else i++ }
   const bad=[...new Set([...seq].filter(c=>!(c in KD)))];
-  return {len:n,cys,pairs:Math.floor(cys/2),sequons:pos.length,pos,sig,sigH,tm,bad};
+  return {len:n,cys,pairs:Math.floor(cys/2),sequons:pos.length,pos,sig,sigH,tm,bad,cr:codonRange(seq)};
 }
 
 function resolve(f,cls,sec){
@@ -394,7 +462,10 @@ function renderFeat(f){
    row("TM segments",String(f.tm),1)+
    row("O-glycosylation","unknown")+
    row("Other modifications","unknown")+
-   (f.bad.length?row("Non-standard residues",f.bad.join(" ")):"");
+   (f.bad.length?row("Non-standard residues",f.bad.join(" ")):"")+
+   (f.cr?row("Codon adaptiveness (A1)",f.cr.best.toFixed(3)+" best / "+f.cr.worst.toFixed(3)+" worst")+
+         row("Design headroom",(f.cr.best/f.cr.worst).toFixed(2)+"×")+
+         row("Worst-served residues",f.cr.poorest.map(a=>a+"×"+f.cr.counts[a]).join(", ")):"");
 }
 const row=(k,v,h)=>'<div class="'+(h?"heur":"")+'" style="display:contents"><dt>'+k+(h?'<span class="tag">HEURISTIC</span>':'')+'</dt><dd>'+v+'</dd></div>';
 
@@ -473,9 +544,22 @@ function budget(){
   const n=state.r?[...new Set(Object.values(state.r).filter(s=>s.state==="eng"&&s.mod).map(s=>s.mod))].length:0;
   const total=n*pct;
   el("fill").style.width=Math.min(total,100)+"%";
+  // Growth laws: growth falls roughly linearly with heterologous mass fraction
+  // and hits zero at the measured ceiling. Harvested product is per-cell yield
+  // times cell accumulation, so productivity peaks at HALF the ceiling.
+  const PHI_MAX=40, OPT=PHI_MAX/2;
+  const growth=Math.max(0,1-total/PHI_MAX);
+  const prod=total*growth, best=OPT*(1-OPT/PHI_MAX);
+  const rel=best>0?prod/best*100:0;
+  let verdict;
+  if(total>=PHI_MAX) verdict="<b style='color:var(--unknown)'>At or past "+PHI_MAX+"% growth stops, so yield is zero.</b>";
+  else if(total>OPT*1.25) verdict="<b style='color:var(--unknown)'>Past the optimum — growth is falling faster than per-cell yield rises.</b>";
+  else if(total<OPT*0.6) verdict="Under-using the cell: there is headroom before growth costs bite.";
+  else verdict="Near the productive optimum.";
   el("budgetOut").innerHTML=n+" module"+(n===1?"":"s")+" × <b>"+pct.toFixed(1)+"%</b> = <b>"+total.toFixed(1)+"%</b> of cell protein. "+
-    (total<=40?"Inside the measured 40% ceiling.":"<b style='color:var(--unknown)'>Over the 40% ceiling — this configuration would not grow.</b>")+
-    " Break-even for "+(n||1)+" module"+(n===1?"":"s")+" is "+(40/(n||1)).toFixed(1)+"% each.";
+    verdict+" Growth <b>"+(growth*100).toFixed(0)+"%</b> of unburdened, productivity <b>"+
+    rel.toFixed(0)+"%</b> of the best reachable. The optimum is <b>"+OPT+"%</b> total, which for "+
+    (n||1)+" module"+(n===1?"":"s")+" means "+(OPT/(n||1)).toFixed(1)+"% each.";
 }
 
 function go(seq,name,idx){

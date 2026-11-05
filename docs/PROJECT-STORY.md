@@ -4,6 +4,7 @@ The durable record. Newest checkpoint at the top. Each entry is written to be
 readable without the conversation it came from.
 
 ## Checkpoints
+1. **2026-11-05 - The chassis consumes the layer, and a known error is out** (below)
 1. **2026-11-04 - The elongation layer is tested against real cells** (below)
 1. **2026-11-03 - The layers get a method, and the method indicts our own code** (below)
 1. **2026-11-03 - Everything so far, in plain language** (below)
@@ -22,6 +23,150 @@ readable without the conversation it came from.
 3. **2026-10-20 — The target is a universal chassis**
 4. **2026-10-20 — How we got here, and what HostMatch is**
 5. **2026-10-17 — The big database does not have what we needed**
+
+---
+
+# 2026-11-05 — The chassis consumes the layer, and a known error is finally out
+
+Records: `chassis/chassis-v1.json` schema 1.1,
+[`scripts/chassis_resolve.py`](../scripts/chassis_resolve.py),
+[`sim/chassis-sim.html`](../sim/chassis-sim.html),
+[`scripts/proteome_budget.py`](../scripts/proteome_budget.py).
+
+## Two checkpoints in a row ended with the same admission
+
+> *"Capability A1 in `chassis-v1.json` still reads 'native, confidence high'.
+> The layer now has measured external evidence behind it and the chassis still
+> does not consume it."*
+
+And one had been outstanding longer than that: **the chassis object still said
+heterologous protein "must stay under 40% of cell protein"**, which the growth
+laws had already shown is the point of *zero yield*. The correction was written
+in three documents and implemented in one script, and the central object still
+carried the wrong reading.
+
+**Both are now closed.**
+
+## A1 is no longer an assertion
+
+**Before**, the whole of A1:
+
+> `"status": "native", "confidence": "high"`,
+> note: *"Yeast codon tables well characterised"*
+
+**That note describes the literature, not the protein on the bench.** It would
+read identically for a protein yeast handles beautifully and one it chokes on.
+
+**Now** A1 carries a `quantitative_layer` block: which model computes it, which
+registered parameters it consumes, the grade anything built on it inherits,
+both external validations with their numbers, and its stated limits.
+
+And `confidence` was split, because the validation forced it:
+
+> `"high for ranking codons, low for any magnitude"`
+
+with the basis recorded — it was "high" on the strength of a sentence about the
+field, and is now backed by a measurement that showed the ordering is
+trustworthy and the spread is not.
+
+### The consequence the object now states about itself
+
+> *"Cysteine is the worst-served residue in S. cerevisiae: 4 tRNA genes
+> genome-wide. Disulfide-bonded secreted therapeutics are the product class
+> this chassis targets, so the target class is built from the residue the host
+> supplies worst. Status 'native' is accurate and misleading on its own: the
+> capability exists and is weak for exactly the intended products."*
+
+## The resolver computes it per protein
+
+`chassis_resolve.py` now prints an A1 block for the actual sequence:
+
+| | preproinsulin | erythropoietin |
+|---|---:|---:|
+| best reachable adaptiveness | 0.676 | 0.704 |
+| worst reachable | 0.093 | 0.077 |
+| **design headroom** | **7.25×** | **9.17×** |
+| worst-served residues present | **C×6**, W×2, H×2 | **C×4**, W×3, H×2 |
+
+**Cysteine comes out top of the worst-served list for both**, without anyone
+asking it to. That is the chassis noticing its own weak spot on each target.
+
+The block also prints the layer's validation rho, the grade inherited (**C**,
+from the wobble constants), and a refusal: **no rate**, with the 27,000× versus
+2.7× reason given inline.
+
+It degrades to the old categorical line if the layer is unavailable, so the
+rest of the resolver does not depend on it.
+
+## The 40% error, removed from the object
+
+`CON-proteome` before: *statement* "must stay under 40%", *value* `0.4`.
+
+Now: **measured ceiling 0.40 and derived optimum 0.20 held as separate
+fields**, `value` set to 0.20, and a `correction` field recording what version 1
+got wrong and why. The caveat is kept: the source says *"exceeding 40%"*, so
+0.40 is a lower bound used as a ceiling, which makes 20% a lower bound too.
+
+`proteome_budget.py` is **marked SUPERSEDED in its own docstring** rather than
+deleted, with the contrast stated plainly: *this script says anything under 40%
+fits; the physics says 40% yields nothing, aim for 20%.* It is kept because the
+project keeps its corrections visible, and because the question it asked was
+answered correctly even though the threshold was read wrongly.
+
+## The published simulator now teaches the correction instead of contradicting it
+
+[Chassis Bench](https://claude.ai/artifact/Up5A8aXK4sjxSF2xPAq9jn), version 3.
+
+**The budget bar used to say "Inside the measured 40% ceiling."** It now shows
+two marks — **20% optimum** and **40% zero yield** — and computes the growth
+curve:
+
+| total heterologous | growth | productivity |
+|---:|---:|---:|
+| 10% | 75% | 75% of best |
+| **20%** | **50%** | **100% of best** |
+| 30% | 25% | 75% of best |
+| 40% | **0%** | **0%** |
+
+**And the codon layer is in the page**, computed in JavaScript from the same
+275 tRNA genes. **Cross-verified against the Python value for value: all 60
+codon weights agree to 12 decimal places, and the protein range matches
+exactly.** Same discipline as the original resolver port.
+
+The footer's claim that the secretory models were *"referenced but not run,
+both MATLAB"* is gone, because it has been false for a week.
+
+## Decisions recorded
+
+| Decision | Against | Why |
+|---|---|---|
+| Split A1 confidence into ranking and magnitude | One confidence value | The validation showed they differ by orders of magnitude |
+| Keep measured ceiling and derived optimum as separate fields | Overwriting 0.40 with 0.20 | The measurement and the inference are different kinds of claim |
+| Mark `proteome_budget.py` superseded, keep the file | Deleting it | Corrections stay visible; the question it asked was sound |
+| Recompute the codon layer in JS and verify against Python | Embedding precomputed weights | A table can drift from the model; a verified reimplementation cannot drift silently |
+| Print the refusal to give a rate inside the resolver output | Putting it only in documentation | Limits beside the number get read every time |
+
+## What is not done
+
+- **21 of 22 capabilities still have no quantitative layer.** A1 is the only
+  one. The rest are categorical judgements.
+- **Six grade-D thresholds are still live in the resolver** — the two
+  hydropathy cut-offs, two window lengths, the N-terminal scan limit, and the
+  1000-residue trigger for an engineered module. Labelled, still deciding.
+- **A1's layer is validated on native yeast genes only.** Its relevance to a
+  foreign protein is an assumption. The chassis exists for foreign proteins.
+- **No module cost extracted from pcSecYeast**, so `CON-proteome` still cannot
+  be checked against a resolved configuration — the 20% figure is correct and
+  untestable here.
+- **Design headroom is not a titre.** 7.25× is what codon choice can move in a
+  dimensionless index, not a sevenfold yield difference.
+- **The 20% optimum rests on a linear growth reduction** that is well supported
+  in *E. coli* and much less tested in yeast.
+- **Layer 2 still fails gate 4**, and six of eight layers have no parameters.
+- The retrospective validation set — 30 to 50 proteins, differential cases
+  first, predictions frozen before reading the answers — **still does not
+  exist.** It remains the test of the chassis's *judgement* rather than its
+  perception, and it is the largest piece of unstarted work in the project.
 
 ---
 

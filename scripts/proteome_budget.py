@@ -1,5 +1,27 @@
 """Proteome budget arithmetic for the universal chassis question.
 
+SUPERSEDED. KEPT AS A RECORD OF A WRONG ANSWER.
+-----------------------------------------------
+This script treats the measured ceiling as a budget: it asks whether the sum
+of module costs fits under 40% of cell protein, and calls anything below that
+line acceptable.
+
+Under the growth laws that is wrong in a consequential way. Growth rate falls
+roughly linearly with heterologous mass fraction and reaches ZERO at the
+ceiling. Harvested product is per-cell yield times cell accumulation, so
+productivity is maximised at HALF the ceiling and is zero AT the ceiling.
+
+    this script says    anything under 40% fits
+    the physics says    40% yields nothing; aim for 20%
+
+Use scripts/growth_coupling.py instead. chassis/chassis-v1.json was corrected
+in schema 1.1 and sim/chassis-sim.html now shows the growth curve rather than
+a pass/fail line.
+
+This file is not deleted because the project keeps its corrections visible,
+and because the question it asks - can one cell carry all 37 capabilities -
+was answered correctly here even though the threshold was read wrongly.
+
 Asks: can one cell carry all 37 capabilities at once?
 
 All input numbers are measured values from the literature, cited in

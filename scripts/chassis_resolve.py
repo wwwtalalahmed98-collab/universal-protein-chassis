@@ -21,6 +21,10 @@ import os
 import re
 import sys
 
+# python -I drops the script's own directory from sys.path, so sibling modules
+# (elongation, params) need it put back explicitly.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -129,6 +133,63 @@ def resolve(chassis, feat, product_class, secreted):
     return active, inactive, unknowns
 
 
+def a1_block(seq, chassis):
+    """Capability A1, computed rather than asserted.
+
+    A1 used to print as "native, confidence high" on the strength of a note
+    saying yeast codon tables are well characterised. That is a statement
+    about the literature, not about the protein on the bench. The elongation
+    layer turns it into numbers for this sequence.
+
+    Degrades to a one-line notice if the layer is unavailable, because the
+    rest of the resolver does not depend on it.
+    """
+    a1 = next((c for c in chassis["capabilities"] if c["id"] == "A1"), None)
+    ql = (a1 or {}).get("quantitative_layer")
+    print("\nA1  CODON ADAPTIVENESS, COMPUTED FOR THIS SEQUENCE")
+    print("-" * 72)
+    if not ql:
+        print("  chassis object carries no quantitative layer for A1")
+        return
+    try:
+        import elongation
+    except Exception as exc:
+        print(f"  layer unavailable ({exc.__class__.__name__}); A1 falls back to")
+        print(f"  the categorical judgement: {a1['status']}, {a1['confidence']}")
+        return
+
+    w, _ = elongation.relative_adaptiveness()
+    rng = elongation.protein_range(seq, w)
+    if not rng:
+        print("  no scorable residues in this sequence")
+        return
+
+    groups = elongation.by_amino_acid(w)
+    print(f"  best reachable by codon choice : {rng['best']:.3f}")
+    print(f"  worst reachable                : {rng['worst']:.3f}")
+    print(f"  design headroom                : {rng['best'] / rng['worst']:.2f}x")
+    print(f"  residues scored                : {rng['n_scored']} "
+          f"(methionine excluded by the method)")
+
+    counts = {}
+    for aa in seq.upper():
+        if aa in groups and aa != "M":
+            counts[aa] = counts.get(aa, 0) + 1
+    worst = sorted(counts, key=lambda a: groups[a][0][1])[:3]
+    if worst:
+        print("  worst-served residues present  : " + ", ".join(
+            f"{a} x{counts[a]} (best w {groups[a][0][1]:.3f})" for a in worst))
+
+    ev = ql["external_validation"]["per_codon_decoding_speed"]
+    print(f"  layer validation               : rho {ev['spearman_rho']:+.3f} "
+          f"vs measured decoding speed, n={ev['n_codons']} codons")
+    print(f"  grade of anything built on it  : {ql['lowest_parameter_grade']}"
+          f"  (lowest input parameter)")
+    print("  NO RATE IS GIVEN. The layer's predicted spread between best and")
+    print("  worst codon is ~27,000x; the measured spread is 2.7x. Ordering is")
+    print("  usable, magnitude is not.")
+
+
 def report(name, seq, product_class, secreted, chassis):
     feat = features(seq)
     active, inactive, unknowns = resolve(chassis, feat, product_class, secreted)
@@ -152,6 +213,8 @@ def report(name, seq, product_class, secreted, chassis):
     print(f"  other PTMs                  : unknown, not computable here")
     if feat["unknown_residues"]:
         print(f"  !! non-standard residues    : {feat['unknown_residues']}")
+
+    a1_block(seq, chassis)
 
     eng = [(cid, c, r) for cid, c, r in active if c["status"] == "engineered"]
     nat = [(cid, c, r) for cid, c, r in active if c["status"] != "engineered"]
@@ -188,8 +251,12 @@ def report(name, seq, product_class, secreted, chassis):
     for cid, nm, why in unknowns:
         print(f"  {cid} {nm}: {why}")
     print("  No titre, yield or success probability. Module 3 is not implemented.")
+    con = chassis["global_constraints"][0]
     print("  No proteome cost check: no engineered module has a measured cost,")
-    print(f"  so the {chassis['global_constraints'][0]['value']:.0%} budget constraint cannot be tested.")
+    print(f"  so the {con['value']:.0%} operating point cannot be tested against this")
+    print(f"  configuration. {con['measured_ceiling_fraction']:.0%} is the measured ceiling and "
+          "the point of zero yield,")
+    print("  not a budget; the useful target is half of it.")
     print("  Signal peptide and transmembrane calls are heuristics, not predictors.")
     print()
 

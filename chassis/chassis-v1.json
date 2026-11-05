@@ -1,158 +1,445 @@
 {
-  "schema_version": "1.0",
-  "chassis_id": "UCP-1",
-  "chassis_name": "Universal computational protein chassis, version 1",
-  "what_this_is": "A machine-readable definition of a protein-production chassis that does NOT exist in any laboratory. It is the designed organism, written down so it can be queried. Base organism is extant; the engineered modules are proposals carrying published precedent, not validated constructs.",
-  "base_organism": {
-    "species": "Saccharomyces cerevisiae",
-    "rationale_file": "protocol/candidate-assessment-v1.md",
-    "proteome_headroom_fraction": 0.4,
-    "headroom_evidence": "These proteins can be expressed at levels exceeding 40% of total protein while maintaining yeast growth",
-    "single_protein_ceiling_fraction": 0.15,
-    "selection_caveat": "Yeast is also the obvious choice. The four architectural rules are tested by what they reject (all prokaryotes, JCVI-syn3.0), not by what they select."
+ "schema_version": "1.1",
+ "chassis_id": "UCP-1",
+ "chassis_name": "Universal computational protein chassis, version 1",
+ "what_this_is": "A machine-readable definition of a protein-production chassis that does NOT exist in any laboratory. It is the designed organism, written down so it can be queried. Base organism is extant; the engineered modules are proposals carrying published precedent, not validated constructs.",
+ "base_organism": {
+  "species": "Saccharomyces cerevisiae",
+  "rationale_file": "protocol/candidate-assessment-v1.md",
+  "proteome_headroom_fraction": 0.4,
+  "headroom_evidence": "These proteins can be expressed at levels exceeding 40% of total protein while maintaining yeast growth",
+  "single_protein_ceiling_fraction": 0.15,
+  "selection_caveat": "Yeast is also the obvious choice. The four architectural rules are tested by what they reject (all prokaryotes, JCVI-syn3.0), not by what they select."
+ },
+ "scope": {
+  "product_class": "proteins",
+  "capabilities_in_full_set": 37,
+  "capabilities_required_for_proteins": 22,
+  "derivation_file": "protocol/scope-proteins-v1.md",
+  "filter_script": "scripts/protein_scope.py"
+ },
+ "global_constraints": [
+  {
+   "id": "CON-proteome",
+   "statement": "Heterologous protein fraction has a measured ceiling near 40% of cell protein, but 40% is the point of ZERO product, not a budget. The useful operating point is about 20%.",
+   "value": 0.2,
+   "status": "measured in the literature",
+   "evidence": "exceeding 40% of total protein while maintaining yeast growth (the measured ceiling); optimum at half the ceiling derived from the proteome-sector growth laws",
+   "measured_ceiling_fraction": 0.4,
+   "derived_optimum_fraction": 0.2,
+   "value_means": "derived_optimum_fraction, not the ceiling",
+   "correction": "Version 1 of this object stated 'must stay under 40%' and set value to 0.4, which treats the ceiling as spendable. Under the growth laws, growth rate falls roughly linearly with heterologous mass fraction and reaches zero at the ceiling. Harvested product is per-cell yield times cell accumulation, so productivity is maximised at half the ceiling and is zero at the ceiling itself. Implemented and shown in scripts/growth_coupling.py.",
+   "parameters_used": [
+    "PRM-phimax-scer"
+   ],
+   "lowest_parameter_grade": "B",
+   "caveat": "The source says 'exceeding 40%', so 0.40 is a lower bound being used as a ceiling, which makes the 20% optimum a lower bound too. The linear growth reduction is a first-order result well supported in E. coli and much less tested in yeast."
   },
-  "scope": {
-    "product_class": "proteins",
-    "capabilities_in_full_set": 37,
-    "capabilities_required_for_proteins": 22,
-    "derivation_file": "protocol/scope-proteins-v1.md",
-    "filter_script": "scripts/protein_scope.py"
+  {
+   "id": "CON-single-protein",
+   "statement": "No single protein above 15% of cell protein",
+   "value": 0.15,
+   "status": "measured in the literature",
+   "evidence": "The limits of some glycolytic proteins were up to 15% of the total cellular protein"
   },
-  "global_constraints": [
-    {
-      "id": "CON-proteome",
-      "statement": "Total heterologous protein must stay under 40% of cell protein",
-      "value": 0.4,
-      "status": "measured in the literature",
-      "evidence": "exceeding 40% of total protein while maintaining yeast growth"
-    },
-    {
-      "id": "CON-single-protein",
-      "statement": "No single protein above 15% of cell protein",
-      "value": 0.15,
-      "status": "measured in the literature",
-      "evidence": "The limits of some glycolytic proteins were up to 15% of the total cellular protein"
-    },
-    {
-      "id": "CON-regulators",
-      "statement": "Independent switches simultaneously active should stay at or below about 12",
-      "value": 12,
-      "status": "measured for CRISPRi in E. coli; assumed transferable",
-      "evidence": "CRISPRi cannot support more than about a dozen simultaneous gRNAs before the fold repression of any individual gRNA drops below 10x",
-      "caveat": "Not binding at 5 engineered switches. Retained because the count may grow."
-    },
-    {
-      "id": "CON-redox",
-      "statement": "Disulfide formation requires an oxidising compartment; cytoplasm is reducing",
-      "status": "measured in the literature",
-      "evidence": "Both eukaryotic and prokaryotic organisms keep their cytoplasm reduced",
-      "resolution": "Route disulfide-bearing products through the ER and secretory pathway. Native in all eukaryotes; no organelle engineering required."
-    }
-  ],
-  "capabilities": [
-    {"id": "A1", "name": "Codon usage compatible with host tRNA pool", "category": "expression", "type": "graded", "status": "native", "always_required": true, "confidence": "high", "note": "Yeast codon tables well characterised"},
-    {"id": "A2", "name": "Promoter function in host", "category": "expression", "type": "binary", "status": "native", "always_required": true, "confidence": "high", "note": "Large characterised promoter sets"},
-    {"id": "A3", "name": "Translation initiation (Kozak context)", "category": "expression", "type": "graded", "status": "native", "always_required": true, "confidence": "high"},
-    {"id": "A4", "name": "Large coding sequence capacity", "category": "expression", "type": "graded", "status": "engineered", "module": "MOD-largecds", "triggered_by": "length_aa > 1000", "confidence": "low"},
-    {"id": "B1", "name": "Folding and chaperone capacity", "category": "maturation", "type": "graded", "status": "native", "always_required": true, "confidence": "high", "note": "ER chaperone machinery; overexpression of Kar2p, PDI, Ero1 studied"},
-    {"id": "B2", "name": "Disulfide bond formation", "category": "maturation", "type": "binary", "status": "native", "triggered_by": "cysteine_pairs >= 1", "confidence": "high", "note": "Native PDI/Ero1 in the ER; requires secretory routing"},
-    {"id": "B3", "name": "N-glycosylation present", "category": "maturation", "type": "binary", "status": "native", "triggered_by": "n_glyc_sequons >= 1", "confidence": "high", "note": "Present, but high-mannose"},
-    {"id": "B4", "name": "Human-like N-glycan structure", "category": "maturation", "type": "binary", "status": "engineered", "module": "MOD-glycan", "triggered_by": "n_glyc_sequons >= 1 AND product_class == therapeutic", "confidence": "medium"},
-    {"id": "B5", "name": "O-glycosylation", "category": "maturation", "type": "binary", "status": "native", "triggered_by": "o_glyc_required", "confidence": "medium", "note": "O-mannosylation present; differs from human O-GalNAc"},
-    {"id": "B6", "name": "Other PTMs (phosphorylation, lipidation, processing)", "category": "maturation", "type": "binary", "status": "partly_native", "triggered_by": "other_ptm_required", "confidence": "low", "note": "Many present, some absent; not enumerated"},
-    {"id": "B7", "name": "Protease balance (product not degraded)", "category": "maturation", "type": "graded", "status": "native_needs_tuning", "always_required": true, "confidence": "medium", "note": "Protease deletion strains are routine"},
-    {"id": "D4", "name": "Amino acid pools", "category": "precursor", "type": "graded", "status": "native", "always_required": true, "confidence": "high"},
-    {"id": "D5", "name": "Sugar-nucleotide pool", "category": "precursor", "type": "graded", "status": "engineered", "module": "MOD-sugarnt", "triggered_by": "capability B4 active", "confidence": "medium", "note": "Required to feed humanised glycans"},
-    {"id": "E3", "name": "Secretion capacity", "category": "compartment", "type": "graded", "status": "engineered", "module": "MOD-secretion", "triggered_by": "secreted == true", "confidence": "medium"},
-    {"id": "F3", "name": "Stress response capacity", "category": "tolerance", "type": "graded", "status": "native", "always_required": true, "confidence": "medium", "note": "Tolerance is the least assessed category in this project"},
-    {"id": "F4", "name": "Feedstock and substrate tolerance", "category": "tolerance", "type": "graded", "status": "native", "always_required": true, "confidence": "medium"},
-    {"id": "G1", "name": "Growth rate and biomass accumulation", "category": "process", "type": "graded", "status": "native", "always_required": true, "confidence": "high"},
-    {"id": "G2", "name": "Growth-production balance (burden control)", "category": "process", "type": "graded", "status": "engineered", "module": "MOD-burden", "always_required": true, "confidence": "low"},
-    {"id": "G3", "name": "Genetic stability over generations", "category": "process", "type": "graded", "status": "native", "always_required": true, "confidence": "medium"},
-    {"id": "G4", "name": "Culture-condition range (O2, temperature, salt)", "category": "process", "type": "graded", "status": "native", "always_required": true, "confidence": "high", "note": "Facultative: aerobic and anaerobic metabolism both available"},
-    {"id": "G5", "name": "Demonstrated scale-up", "category": "process", "type": "binary", "status": "native", "always_required": true, "confidence": "high"},
-    {"id": "G6", "name": "Safety and regulatory status", "category": "process", "type": "binary", "status": "native", "always_required": true, "confidence": "high", "note": "GRAS"}
-  ],
-  "engineered_modules": [
-    {
-      "id": "MOD-glycan",
-      "satisfies": ["B4"],
-      "goal": "Replace high-mannose yeast N-glycans with human-like structures",
-      "published_precedent": "Glycan humanisation has been achieved in yeast; pcSecYeastSpecies includes humanized glycosylation modules",
-      "parts_required": ["OCH1 knockout", "alpha-1,2-mannosidase", "GlcNAc transferase I and II", "galactosyltransferase", "ER/Golgi localisation signals"],
-      "proteome_cost_estimate_fraction": null,
-      "cost_status": "not measured anywhere; this is the most expensive module and its cost is unknown",
-      "confidence": "medium",
-      "unverified": "Part list assembled from the general glycoengineering literature, not from one validated published strain."
-    },
-    {
-      "id": "MOD-sugarnt",
-      "satisfies": ["D5"],
-      "goal": "Supply UDP-GlcNAc and UDP-galactose at the rate humanised glycans consume them",
-      "published_precedent": "Sugar-nucleotide supply is a named bottleneck in glycoengineering",
-      "parts_required": ["UDP-GlcNAc pathway enzymes", "UDP-Gal 4-epimerase", "Golgi nucleotide-sugar transporters"],
-      "proteome_cost_estimate_fraction": null,
-      "cost_status": "not measured",
-      "confidence": "medium",
-      "coupling": "Only required when MOD-glycan is active. Costs must be summed with it, not counted separately."
-    },
-    {
-      "id": "MOD-secretion",
-      "satisfies": ["E3"],
-      "goal": "Raise secretory flux above native capacity",
-      "published_precedent": "Overexpression of secretion helpers PDI1, ERO1, SSO2, KAR2/BiP and HAC1; pcSecYeast identified overexpression targets for improved recombinant protein production",
-      "parts_required": ["signal peptide selection", "ER chaperone overexpression", "UPR regulator HAC1", "gene dosage tuning"],
-      "proteome_cost_estimate_fraction": null,
-      "cost_status": "not measured",
-      "confidence": "medium",
-      "unverified": "Which helpers to overexpress is protein-specific. Structural Homology Fails to Predict Secretion Efficiency in Pichia pastoris reports architecturally similar proteins diverging under identical engineering."
-    },
-    {
-      "id": "MOD-largecds",
-      "satisfies": ["A4"],
-      "goal": "Express coding sequences beyond routine size without truncation or recombination",
-      "published_precedent": "A 106 kb biosynthetic cluster has been assembled and expressed heterologously",
-      "parts_required": ["assembly strategy", "integration locus choice", "repeat-avoiding codon design"],
-      "proteome_cost_estimate_fraction": null,
-      "cost_status": "not measured",
-      "confidence": "low",
-      "unverified": "The cited precedent is a multi-gene cluster, not a single large protein. Relevance is assumed, not shown."
-    },
-    {
-      "id": "MOD-burden",
-      "satisfies": ["G2"],
-      "goal": "Keep heterologous expression inside the proteome budget by switching modules rather than running them constitutively",
-      "published_precedent": "Proteome allocation constraints are modelled in pcSecYeast and pcSecYeastSpecies",
-      "parts_required": ["inducible promoters per module", "a small set of orthogonal regulators (5 addresses is within routine reach)"],
-      "proteome_cost_estimate_fraction": null,
-      "cost_status": "not measured",
-      "confidence": "low",
-      "note": "Demoted from architectural requirement to optimisation when scope narrowed to proteins. See protocol/scope-proteins-v1.md."
-    }
-  ],
-  "known_weaknesses_of_base_organism": [
-    "Crabtree effect: ferments to ethanol even with oxygen present, wasting carbon",
-    "Native N-glycans are high-mannose and need engineering for therapeutic products",
-    "Not the best secretor; Komagataella phaffii is better, and pcSecYeastSpecies now models it"
-  ],
-  "what_this_object_cannot_do": [
-    "It cannot predict titre. No quantitative model is attached in version 1.",
-    "It carries no measured proteome cost for any engineered module, so global_constraints cannot yet be checked against a resolved configuration.",
-    "Every module is a proposal with published precedent, not a validated construct. Nothing here has been built.",
-    "Confidence values are the author's judgement from abstracts and README files, not calibrated estimates.",
-    "Tolerance (F3, F4) is the least assessed area and the literature calls it the usual binding constraint."
-  ],
-  "provenance": {
-    "capability_set": "protocol/capability-set-v1.md",
-    "protein_filter": "protocol/scope-proteins-v1.md",
-    "conflicts": "protocol/conflict-map-v1.md",
-    "budget": "protocol/proteome-budget-v1.md",
-    "control": "protocol/regulatory-capacity-v1.md",
-    "organism_choice": "protocol/candidate-assessment-v1.md",
-    "tool_architecture": "protocol/tool-spec-v1.md",
-    "external_models": [
-      "github.com/SysBioChalmers/pcSecYeast (GPL-3.0, last updated 2021-07-20, MATLAB)",
-      "github.com/LiLabTsinghua/pcSecYeastSpecies (updated 2025-12, MATLAB, covers S. cerevisiae, K. phaffii, K. marxianus)"
-    ]
+  {
+   "id": "CON-regulators",
+   "statement": "Independent switches simultaneously active should stay at or below about 12",
+   "value": 12,
+   "status": "measured for CRISPRi in E. coli; assumed transferable",
+   "evidence": "CRISPRi cannot support more than about a dozen simultaneous gRNAs before the fold repression of any individual gRNA drops below 10x",
+   "caveat": "Not binding at 5 engineered switches. Retained because the count may grow."
+  },
+  {
+   "id": "CON-redox",
+   "statement": "Disulfide formation requires an oxidising compartment; cytoplasm is reducing",
+   "status": "measured in the literature",
+   "evidence": "Both eukaryotic and prokaryotic organisms keep their cytoplasm reduced",
+   "resolution": "Route disulfide-bearing products through the ER and secretory pathway. Native in all eukaryotes; no organelle engineering required."
   }
+ ],
+ "capabilities": [
+  {
+   "id": "A1",
+   "name": "Codon usage compatible with host tRNA pool",
+   "category": "expression",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high for ranking codons, low for any magnitude",
+   "note": "No longer a bare boolean. A quantitative layer computes this per protein from the yeast tRNA gene complement. See quantitative_layer below.",
+   "confidence_basis": "Was 'high' on the strength of the sentence 'yeast codon tables well characterised', which describes the literature rather than this chassis. It is now backed by an external measurement, and split, because the validation showed the ranking is trustworthy and the spread is not.",
+   "quantitative_layer": {
+    "layer": "1c, translation elongation",
+    "implemented_in": "scripts/elongation.py",
+    "validated_in": "scripts/validate_elongation.py, reports/04-elongation-validation.md",
+    "computes": "Relative codon adaptiveness for S. cerevisiae from tRNA gene copy numbers. For a protein sequence it returns the best and worst adaptiveness reachable by choosing codons, which is the design headroom, plus the best reachable weight for each residue type.",
+    "parameters_used": [
+     "PRM-trna-gcn-scer",
+     "PRM-tai-s-values"
+    ],
+    "lowest_parameter_grade": "C",
+    "grade_rule": "Under the composition rule in protocol/layer-architecture-v1.md, any prediction built on this layer is grade C, because PRM-tai-s-values is a published model constant whose fit to yeast is unverified.",
+    "external_validation": {
+     "per_codon_decoding_speed": {
+      "source": "Gardin et al. 2014, eLife 3:e03735, Table 2A, ribosome residence time at the A site",
+      "spearman_rho": -0.623,
+      "p_value": 1.8e-07,
+      "n_codons": 58,
+      "direction": "as predicted: better served codons are decoded faster",
+      "beats_control": "codon usage frequency, the predictor needing no tRNA data, scores -0.536. The tRNA pool does better."
+     },
+     "per_gene_translation_efficiency": {
+      "source": "Weinberg et al. 2016, GEO GSE75897, footprint density over mRNA abundance",
+      "spearman_rho": 0.439,
+      "n_genes": 4820,
+      "controls": "amino-acid-composition-only scores +0.262; none of 200 shuffled-weight permutations reached the observed value",
+      "caveat": "partly circular, because the tAI constants were fitted against codon usage bias, which is strongest in highly expressed genes. The controls carry the weight, not the rho."
+     }
+    },
+    "what_it_cannot_say": [
+     "No rate. The output is dimensionless and the scaling to codons per second is not registered, so none is emitted.",
+     "Predicted spread between best and worst codon is about 27,000x; measured spread is 2.7x. The ordering is informative and the magnitude is not.",
+     "CGA is the clearest failure: no tRNA reads it Watson-Crick so the layer calls it unreadable, and the measurement finds it merely slow. Wobble decoding works, just poorly.",
+     "Both validation datasets are native yeast genes in unstressed rich medium. Nothing is tested on a heterologous protein, which is what this chassis exists to make.",
+     "No tRNA modification. Wobble decoding is summarised by one constant per pairing type."
+    ],
+    "consequence_for_this_chassis": "Cysteine is the worst-served residue in S. cerevisiae: 4 tRNA genes genome-wide and a best reachable weight of 0.246. Disulfide-bonded secreted therapeutics are the product class this chassis targets, so the target class is built from the residue the host supplies worst, and codon choice cannot change it. Status 'native' is accurate and misleading on its own: the capability exists and is weak for exactly the intended products."
+   }
+  },
+  {
+   "id": "A2",
+   "name": "Promoter function in host",
+   "category": "expression",
+   "type": "binary",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high",
+   "note": "Large characterised promoter sets"
+  },
+  {
+   "id": "A3",
+   "name": "Translation initiation (Kozak context)",
+   "category": "expression",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high"
+  },
+  {
+   "id": "A4",
+   "name": "Large coding sequence capacity",
+   "category": "expression",
+   "type": "graded",
+   "status": "engineered",
+   "module": "MOD-largecds",
+   "triggered_by": "length_aa > 1000",
+   "confidence": "low"
+  },
+  {
+   "id": "B1",
+   "name": "Folding and chaperone capacity",
+   "category": "maturation",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high",
+   "note": "ER chaperone machinery; overexpression of Kar2p, PDI, Ero1 studied"
+  },
+  {
+   "id": "B2",
+   "name": "Disulfide bond formation",
+   "category": "maturation",
+   "type": "binary",
+   "status": "native",
+   "triggered_by": "cysteine_pairs >= 1",
+   "confidence": "high",
+   "note": "Native PDI/Ero1 in the ER; requires secretory routing"
+  },
+  {
+   "id": "B3",
+   "name": "N-glycosylation present",
+   "category": "maturation",
+   "type": "binary",
+   "status": "native",
+   "triggered_by": "n_glyc_sequons >= 1",
+   "confidence": "high",
+   "note": "Present, but high-mannose"
+  },
+  {
+   "id": "B4",
+   "name": "Human-like N-glycan structure",
+   "category": "maturation",
+   "type": "binary",
+   "status": "engineered",
+   "module": "MOD-glycan",
+   "triggered_by": "n_glyc_sequons >= 1 AND product_class == therapeutic",
+   "confidence": "medium"
+  },
+  {
+   "id": "B5",
+   "name": "O-glycosylation",
+   "category": "maturation",
+   "type": "binary",
+   "status": "native",
+   "triggered_by": "o_glyc_required",
+   "confidence": "medium",
+   "note": "O-mannosylation present; differs from human O-GalNAc"
+  },
+  {
+   "id": "B6",
+   "name": "Other PTMs (phosphorylation, lipidation, processing)",
+   "category": "maturation",
+   "type": "binary",
+   "status": "partly_native",
+   "triggered_by": "other_ptm_required",
+   "confidence": "low",
+   "note": "Many present, some absent; not enumerated"
+  },
+  {
+   "id": "B7",
+   "name": "Protease balance (product not degraded)",
+   "category": "maturation",
+   "type": "graded",
+   "status": "native_needs_tuning",
+   "always_required": true,
+   "confidence": "medium",
+   "note": "Protease deletion strains are routine"
+  },
+  {
+   "id": "D4",
+   "name": "Amino acid pools",
+   "category": "precursor",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high"
+  },
+  {
+   "id": "D5",
+   "name": "Sugar-nucleotide pool",
+   "category": "precursor",
+   "type": "graded",
+   "status": "engineered",
+   "module": "MOD-sugarnt",
+   "triggered_by": "capability B4 active",
+   "confidence": "medium",
+   "note": "Required to feed humanised glycans"
+  },
+  {
+   "id": "E3",
+   "name": "Secretion capacity",
+   "category": "compartment",
+   "type": "graded",
+   "status": "engineered",
+   "module": "MOD-secretion",
+   "triggered_by": "secreted == true",
+   "confidence": "medium"
+  },
+  {
+   "id": "F3",
+   "name": "Stress response capacity",
+   "category": "tolerance",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "medium",
+   "note": "Tolerance is the least assessed category in this project"
+  },
+  {
+   "id": "F4",
+   "name": "Feedstock and substrate tolerance",
+   "category": "tolerance",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "medium"
+  },
+  {
+   "id": "G1",
+   "name": "Growth rate and biomass accumulation",
+   "category": "process",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high"
+  },
+  {
+   "id": "G2",
+   "name": "Growth-production balance (burden control)",
+   "category": "process",
+   "type": "graded",
+   "status": "engineered",
+   "module": "MOD-burden",
+   "always_required": true,
+   "confidence": "low"
+  },
+  {
+   "id": "G3",
+   "name": "Genetic stability over generations",
+   "category": "process",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "medium"
+  },
+  {
+   "id": "G4",
+   "name": "Culture-condition range (O2, temperature, salt)",
+   "category": "process",
+   "type": "graded",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high",
+   "note": "Facultative: aerobic and anaerobic metabolism both available"
+  },
+  {
+   "id": "G5",
+   "name": "Demonstrated scale-up",
+   "category": "process",
+   "type": "binary",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high"
+  },
+  {
+   "id": "G6",
+   "name": "Safety and regulatory status",
+   "category": "process",
+   "type": "binary",
+   "status": "native",
+   "always_required": true,
+   "confidence": "high",
+   "note": "GRAS"
+  }
+ ],
+ "engineered_modules": [
+  {
+   "id": "MOD-glycan",
+   "satisfies": [
+    "B4"
+   ],
+   "goal": "Replace high-mannose yeast N-glycans with human-like structures",
+   "published_precedent": "Glycan humanisation has been achieved in yeast; pcSecYeastSpecies includes humanized glycosylation modules",
+   "parts_required": [
+    "OCH1 knockout",
+    "alpha-1,2-mannosidase",
+    "GlcNAc transferase I and II",
+    "galactosyltransferase",
+    "ER/Golgi localisation signals"
+   ],
+   "proteome_cost_estimate_fraction": null,
+   "cost_status": "not measured anywhere; this is the most expensive module and its cost is unknown",
+   "confidence": "medium",
+   "unverified": "Part list assembled from the general glycoengineering literature, not from one validated published strain."
+  },
+  {
+   "id": "MOD-sugarnt",
+   "satisfies": [
+    "D5"
+   ],
+   "goal": "Supply UDP-GlcNAc and UDP-galactose at the rate humanised glycans consume them",
+   "published_precedent": "Sugar-nucleotide supply is a named bottleneck in glycoengineering",
+   "parts_required": [
+    "UDP-GlcNAc pathway enzymes",
+    "UDP-Gal 4-epimerase",
+    "Golgi nucleotide-sugar transporters"
+   ],
+   "proteome_cost_estimate_fraction": null,
+   "cost_status": "not measured",
+   "confidence": "medium",
+   "coupling": "Only required when MOD-glycan is active. Costs must be summed with it, not counted separately."
+  },
+  {
+   "id": "MOD-secretion",
+   "satisfies": [
+    "E3"
+   ],
+   "goal": "Raise secretory flux above native capacity",
+   "published_precedent": "Overexpression of secretion helpers PDI1, ERO1, SSO2, KAR2/BiP and HAC1; pcSecYeast identified overexpression targets for improved recombinant protein production",
+   "parts_required": [
+    "signal peptide selection",
+    "ER chaperone overexpression",
+    "UPR regulator HAC1",
+    "gene dosage tuning"
+   ],
+   "proteome_cost_estimate_fraction": null,
+   "cost_status": "not measured",
+   "confidence": "medium",
+   "unverified": "Which helpers to overexpress is protein-specific. Structural Homology Fails to Predict Secretion Efficiency in Pichia pastoris reports architecturally similar proteins diverging under identical engineering."
+  },
+  {
+   "id": "MOD-largecds",
+   "satisfies": [
+    "A4"
+   ],
+   "goal": "Express coding sequences beyond routine size without truncation or recombination",
+   "published_precedent": "A 106 kb biosynthetic cluster has been assembled and expressed heterologously",
+   "parts_required": [
+    "assembly strategy",
+    "integration locus choice",
+    "repeat-avoiding codon design"
+   ],
+   "proteome_cost_estimate_fraction": null,
+   "cost_status": "not measured",
+   "confidence": "low",
+   "unverified": "The cited precedent is a multi-gene cluster, not a single large protein. Relevance is assumed, not shown."
+  },
+  {
+   "id": "MOD-burden",
+   "satisfies": [
+    "G2"
+   ],
+   "goal": "Keep heterologous expression inside the proteome budget by switching modules rather than running them constitutively",
+   "published_precedent": "Proteome allocation constraints are modelled in pcSecYeast and pcSecYeastSpecies",
+   "parts_required": [
+    "inducible promoters per module",
+    "a small set of orthogonal regulators (5 addresses is within routine reach)"
+   ],
+   "proteome_cost_estimate_fraction": null,
+   "cost_status": "not measured",
+   "confidence": "low",
+   "note": "Demoted from architectural requirement to optimisation when scope narrowed to proteins. See protocol/scope-proteins-v1.md."
+  }
+ ],
+ "known_weaknesses_of_base_organism": [
+  "Crabtree effect: ferments to ethanol even with oxygen present, wasting carbon",
+  "Native N-glycans are high-mannose and need engineering for therapeutic products",
+  "Not the best secretor; Komagataella phaffii is better, and pcSecYeastSpecies now models it"
+ ],
+ "what_this_object_cannot_do": [
+  "It cannot predict titre. One quantitative layer is now attached (A1, translation elongation) and it deliberately emits no rate.",
+  "It carries no measured proteome cost for any engineered module, so global_constraints cannot yet be checked against a resolved configuration.",
+  "Every module is a proposal with published precedent, not a validated construct. Nothing here has been built.",
+  "Confidence values are the author's judgement from abstracts and README files, not calibrated estimates.",
+  "Tolerance (F3, F4) is the least assessed area and the literature calls it the usual binding constraint.",
+  "Of the 8 registered parameters inside scripts/chassis_resolve.py, 6 have no external source at all, including the 1000-residue threshold that triggers MOD-largecds. See params/parameters-v1.json and protocol/layer-architecture-v1.md.",
+  "Only 1 of 22 capabilities has a quantitative layer behind it. The other 21 are still categorical judgements.",
+  "A1's layer is validated on native yeast genes only. Its relevance to heterologous protein is an assumption, not a result."
+ ],
+ "provenance": {
+  "capability_set": "protocol/capability-set-v1.md",
+  "protein_filter": "protocol/scope-proteins-v1.md",
+  "conflicts": "protocol/conflict-map-v1.md",
+  "budget": "protocol/proteome-budget-v1.md",
+  "control": "protocol/regulatory-capacity-v1.md",
+  "organism_choice": "protocol/candidate-assessment-v1.md",
+  "tool_architecture": "protocol/tool-spec-v1.md",
+  "external_models": [
+   "github.com/SysBioChalmers/pcSecYeast (GPL-3.0, last updated 2021-07-20, MATLAB)",
+   "github.com/LiLabTsinghua/pcSecYeastSpecies (updated 2025-12, MATLAB, covers S. cerevisiae, K. phaffii, K. marxianus)"
+  ]
+ },
+ "changelog": [
+  {
+   "version": "1.1",
+   "date": "2026-11-05",
+   "changes": [
+    "A1 now carries quantitative_layer: the elongation model, its two parameters, its external validation, and its stated limits.",
+    "A1 confidence split into ranking versus magnitude, with the basis recorded.",
+    "CON-proteome corrected: value moved from 0.40 to 0.20, measured ceiling and derived optimum separated. The old statement treated the ceiling as a budget, which the growth laws say is the point of zero yield.",
+    "what_this_object_cannot_do extended with the grade-D parameter count and the coverage of quantitative layers."
+   ]
+  }
+ ]
 }
