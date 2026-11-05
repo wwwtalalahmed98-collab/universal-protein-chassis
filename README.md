@@ -82,6 +82,7 @@ that no larger model removes.
 | `scripts/elongation.py` | Theory-stack layer 1c: codon adaptiveness from tRNA gene copy numbers |
 | `scripts/validate_elongation.py` | Tests that layer against measured yeast ribosome profiling |
 | `sim/chassis-sim.html` | Interactive simulation, same logic in JavaScript |
+| `sim/chassis-3d.html` | Live 3D cell: orbit the chassis, watch a product routed through it, growth law drives division |
 | `protocol/` | The reasoning, one document per question, each ending in what it does not know |
 | `docs/PROJECT-STORY.md` | Durable record: every checkpoint, decision, and reversal, newest first |
 | `reports/` | Findings from investigations that were closed out |

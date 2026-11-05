@@ -1,0 +1,1016 @@
+<title>UCP-1 Vivarium</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an observation chamber. Full-bleed specimen viewport with projected
+   compartment labels, a telemetry rail beside it, then the capability lattice,
+   the growth-law plot, and the limits panel. Committed single dark world: this
+   is an instrument looking into a cell, and it should look the same to everyone. */
+:root{
+  --void:#070B10; --chamber:#0C131A; --panel:#111A22; --panel-2:#16212B;
+  --ink:#E4EDF2; --ink-2:#9FB3C0; --ink-3:#6B8290;
+  --line:#1E2C38; --line-2:#2B3F4E;
+  --native:#3FBF9A; --native-dim:#14433A;
+  --eng:#E3A54F; --eng-dim:#44320F;
+  --unknown:#DC8871; --unknown-dim:#43211A;
+  --product:#6FD8E8; --dna:#A98BE0;
+  --font-display:'Archivo',system-ui,sans-serif;
+  --font-body:'Source Serif 4',Georgia,serif;
+  --font-data:'IBM Plex Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--void);color:var(--ink);font-family:var(--font-body);line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:24px 56px}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance}
+h1{font-size:clamp(25px,4.2vw,38px);font-weight:700;letter-spacing:-.022em;line-height:1.06}
+h2{font-size:13px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-2)}
+h3{font-size:15px;font-weight:600;letter-spacing:-.008em}
+.mono{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--font-data);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--product)}
+header{border-bottom:1px solid var(--line);padding-bottom:18px}
+header .sub{color:var(--ink-2);max-width:66ch;margin:9px 0 0;font-size:16px}
+section{margin-top:28px}
+.sechead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sechead p{margin:0;color:var(--ink-3);font-size:13.5px;font-family:var(--font-display)}
+
+/* status strip */
+.status{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 11px;min-width:0}
+.stat .k{font-family:var(--font-data);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-family:var(--font-data);font-size:15px;font-variant-numeric:tabular-nums;margin-top:1px}
+
+/* chamber */
+.chamber{display:grid;grid-template-columns:1fr 316px;gap:14px;align-items:start}
+@media (max-width:900px){.chamber{grid-template-columns:1fr}}
+.stage{position:relative;background:
+   radial-gradient(130% 100% at 50% 0%,#101C26 0%,var(--void) 72%);
+  border:1px solid var(--line-2);border-radius:14px;overflow:hidden;min-width:0}
+#cv{display:block;width:100%;height:520px}
+@media (max-width:900px){#cv{height:400px}}
+@media (max-width:420px){#cv{height:330px}}
+.lbl{position:absolute;transform:translate(-50%,-50%);pointer-events:none;
+  font-family:var(--font-data);font-size:10.5px;letter-spacing:.07em;white-space:nowrap;
+  padding:2px 7px;border-radius:5px;border:1px solid var(--line-2);
+  background:rgba(7,11,16,.74);color:var(--ink-2);transition:opacity .3s;backdrop-filter:blur(2px)}
+.lbl.on{color:var(--ink);border-color:var(--native)}
+.lbl.eng{color:var(--eng);border-color:var(--eng)}
+.hint{position:absolute;right:10px;bottom:9px;font-family:var(--font-data);font-size:10px;
+  color:var(--ink-3);pointer-events:none}
+.legend3{position:absolute;left:12px;bottom:9px;display:flex;gap:12px;flex-wrap:wrap;
+  font-family:var(--font-data);font-size:10px;color:var(--ink-3);pointer-events:none}
+.legend3 i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+.fallback{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px;
+  font-family:var(--font-display);font-size:14px;color:var(--ink-2)}
+
+/* rail */
+.rail{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px}
+.card>h3{margin-bottom:3px}
+.card .note{color:var(--ink-3);font-size:12.5px;margin:0 0 10px;font-family:var(--font-display)}
+dl.feat{display:grid;grid-template-columns:1fr auto;gap:3px 12px;margin:0;font-size:13px}
+dl.feat dt{color:var(--ink-2);font-family:var(--font-display);min-width:0}
+dl.feat dd{margin:0;font-family:var(--font-data);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+dl.feat .heur dt,dl.feat .heur dd{color:var(--ink-3)}
+.tag{font-family:var(--font-data);font-size:9px;letter-spacing:.07em;padding:1px 4px;border-radius:4px;
+  background:var(--unknown-dim);color:var(--unknown);margin-left:5px;vertical-align:1px}
+#log{font-family:var(--font-data);font-size:11px;line-height:1.7;color:var(--ink-2);margin:0;
+  max-height:166px;overflow-y:auto}
+#log div{opacity:0;animation:fade .28s forwards;padding:1px 0}
+@keyframes fade{to{opacity:1}}
+#log b{color:var(--native);font-weight:500}
+#log i{color:var(--eng);font-style:normal}
+#log u{color:var(--product);text-decoration:none}
+
+/* controls */
+.ctrls{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px;
+  display:flex;flex-direction:column;gap:12px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+button.chip{font-family:var(--font-display);font-size:13px;font-weight:500;padding:8px 12px;border-radius:999px;
+  border:1px solid var(--line-2);background:var(--panel-2);color:var(--ink);cursor:pointer;transition:.14s;text-align:left}
+button.chip:hover{border-color:var(--product)}
+button.chip[aria-pressed="true"]{background:var(--product);border-color:var(--product);color:#06222A}
+button.chip small{display:block;font-family:var(--font-data);font-size:10px;opacity:.75;font-weight:400}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+label.opt{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);font-family:var(--font-display)}
+select,textarea{font-family:var(--font-data);font-size:12px;padding:7px 9px;border:1px solid var(--line-2);
+  border-radius:8px;background:var(--panel-2);color:var(--ink)}
+textarea{flex:1 1 260px;min-width:0;min-height:54px;resize:vertical}
+.btn{font-family:var(--font-display);font-weight:600;font-size:13px;padding:9px 14px;border-radius:8px;
+  cursor:pointer;border:1px solid var(--product);background:var(--product);color:#06222A}
+.btn.ghost{background:transparent;color:var(--product)}
+input[type=range]{width:100%;accent-color:var(--eng)}
+.slab{display:grid;grid-template-columns:1fr auto;gap:4px;align-items:baseline}
+.slab span{font-family:var(--font-display);font-size:13px;color:var(--ink-2)}
+.slab b{font-family:var(--font-data);font-size:13px}
+
+/* lattice */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:7px}
+.cap{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--panel);min-width:0}
+.cap .cid{font-family:var(--font-data);font-size:10px;letter-spacing:.06em;color:var(--ink-3)}
+.cap .cname{font-family:var(--font-display);font-size:12.5px;font-weight:500;line-height:1.3;margin-top:2px}
+.cap .why{font-family:var(--font-data);font-size:10px;color:var(--ink-3);margin-top:4px;line-height:1.45}
+.cap.off{opacity:.38}
+.cap.nat{background:var(--native-dim);border-color:var(--native)}
+.cap.nat .cid{color:var(--native)}
+.cap.eng{background:var(--eng-dim);border-color:var(--eng)}
+.cap.eng .cid{color:var(--eng)}
+.cap.unk{background:var(--unknown-dim);border-color:var(--unknown);border-style:dashed}
+.cap.unk .cid{color:var(--unknown)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--font-data);font-size:11px;color:var(--ink-2);margin-bottom:10px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:10px;height:10px;border-radius:3px;border:1px solid}
+.sw.n{background:var(--native-dim);border-color:var(--native)}
+.sw.e{background:var(--eng-dim);border-color:var(--eng)}
+.sw.u{background:var(--unknown-dim);border-color:var(--unknown);border-style:dashed}
+.sw.o{background:var(--panel);border-color:var(--line)}
+
+/* modules */
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(266px,1fr));gap:11px}
+.mod{border:1px solid var(--eng);border-radius:11px;background:var(--panel);padding:13px;min-width:0}
+.mod .mid{font-family:var(--font-data);font-size:10.5px;color:var(--eng);letter-spacing:.06em}
+.mod h3{margin:3px 0 6px}
+.mod p{margin:0 0 8px;font-size:13.5px;color:var(--ink-2)}
+.mod .parts{font-family:var(--font-data);font-size:10.5px;color:var(--ink-3);line-height:1.6}
+.mod .cost{font-family:var(--font-data);font-size:10.5px;color:var(--unknown);margin-top:8px;padding-top:7px;
+  border-top:1px dashed var(--line-2)}
+.conf{font-family:var(--font-data);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 5px;
+  border-radius:4px;border:1px solid currentColor;color:var(--ink-3)}
+
+/* growth */
+.growthwrap{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+@media (max-width:760px){.growthwrap{grid-template-columns:1fr}}
+#gcv{display:block;width:100%;height:190px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+
+/* limits */
+.limits{background:var(--unknown-dim);border:1px solid var(--unknown);border-radius:12px;padding:17px}
+.limits h2{color:var(--unknown)}
+.limits ul{margin:11px 0 0;padding-left:19px;font-size:14px}
+.limits li{margin-bottom:7px}
+.limits li b{font-weight:600;color:var(--ink)}
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--font-data);
+  font-size:11px;color:var(--ink-3);line-height:1.8}
+@media (prefers-reduced-motion:reduce){#log div{animation:none;opacity:1}.lbl{transition:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">UCP-1 &middot; Saccharomyces cerevisiae &middot; specimen does not exist</div>
+  <h1>UCP-1 Vivarium</h1>
+  <p class="sub">A living view of the chassis this project has been designing. Pick a protein and the cell reconfigures: the compartments that have to act light up, the modifications the product needs are built onto it as it travels, and the engineered parts the yeast does not already have are marked in amber. Drag to orbit, scroll to zoom. Everything you see is computed from the project's own data &mdash; and nothing here has been built in a laboratory.</p>
+  <div class="status" id="status"></div>
+</header>
+
+<section class="chamber">
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="fallback" id="fb">The 3D view could not load its renderer.<br>Everything below still works.</div>
+    <div class="legend3">
+      <span><i style="background:var(--native)"></i>native to yeast</span>
+      <span><i style="background:var(--eng)"></i>engineered in</span>
+      <span><i style="background:var(--product)"></i>the product</span>
+    </div>
+    <div class="hint">drag to orbit &middot; scroll to zoom</div>
+  </div>
+
+  <div class="rail">
+    <div class="ctrls">
+      <div class="chips" id="chips"></div>
+      <div class="row">
+        <label class="opt"><input type="checkbox" id="secreted" checked> Secreted</label>
+        <label class="opt">Class
+          <select id="pclass">
+            <option value="therapeutic">therapeutic</option>
+            <option value="enzyme">enzyme</option>
+            <option value="antigen">antigen</option>
+            <option value="other">other</option>
+          </select>
+        </label>
+        <button class="btn ghost" id="pause" type="button">Pause</button>
+      </div>
+      <div class="row">
+        <textarea id="custom" placeholder="Or paste an amino acid sequence"></textarea>
+        <button class="btn" id="run" type="button">Load</button>
+      </div>
+      <div>
+        <div class="slab"><span>Proteome given to the foreign product</span><b class="mono" id="loadOut">8%</b></div>
+        <input type="range" id="load" min="0" max="48" step="1" value="8">
+        <div class="slab" style="margin-top:4px"><span style="font-size:12px;color:var(--ink-3)">Division rate follows the growth law. At 40% it stops.</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Readout</h3>
+      <p class="note">Computed from the sequence you loaded.</p>
+      <dl class="feat" id="feat"></dl>
+    </div>
+
+    <div class="card">
+      <h3>Transit log</h3>
+      <p class="note">What the cell is doing to the product, step by step.</p>
+      <div id="log" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><h2>Capability lattice</h2><p id="capCount"></p></div>
+  <div class="legend">
+    <span><i class="sw n"></i> native to yeast</span>
+    <span><i class="sw e"></i> needs engineering</span>
+    <span><i class="sw u"></i> unknown from sequence</span>
+    <span><i class="sw o"></i> not needed here</span>
+  </div>
+  <div class="grid" id="caps"></div>
+</section>
+
+<section>
+  <div class="sechead"><h2>Modules to build</h2><p id="modCount"></p></div>
+  <div class="mods" id="mods"></div>
+</section>
+
+<section>
+  <div class="sechead"><h2>Growth coupling</h2><p>Why 40% is the point of zero yield and not a budget.</p></div>
+  <div class="growthwrap">
+    <canvas id="gcv" aria-label="Productivity against share of cell protein given to the foreign product, peaking at 20 percent and returning to zero at 40 percent"></canvas>
+    <div class="card">
+      <h3>What the slider does</h3>
+      <p class="note" style="margin-bottom:8px">Growth falls as foreign protein takes over the cell. What you harvest is how much each cell makes times how fast cells multiply, so the best point is half the ceiling.</p>
+      <dl class="feat" id="gfeat"></dl>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="limits">
+    <h2>What this cannot tell you</h2>
+    <ul>
+      <li><b>The geometry is schematic.</b> Compartment shapes and positions are drawn to be read, not to be structurally accurate. The topology of the route &mdash; nucleus, ER, Golgi, vesicle, out &mdash; is the part that is correct.</li>
+      <li><b>No titre, no yield, no probability of success.</b> The staples and glycan trees you watch being attached are counts read off the sequence, not a prediction that the cell will attach them successfully.</li>
+      <li><b>Codon adaptiveness ranks codons and cannot give a rate.</b> It is computed from 275 yeast tRNA genes and agrees with measured per-codon decoding speed at &rho;&nbsp;=&nbsp;&minus;0.62. But its predicted spread between best and worst codon is about 27,000&times; where the measured spread is 2.7&times;, so nothing in this page moves faster or slower because of it.</li>
+      <li><b>Only 1 of 22 capabilities has quantitative physics behind it.</b> That is A1. The other 21 are categorical judgements, and six of the thresholds driving them have no published source at all &mdash; including the round 1000-residue number that decides whether a module gets built.</li>
+      <li><b>The division rate is first-order physics.</b> Growth is taken to fall linearly with foreign protein and reach zero at 40%. That shape is well supported in <i>E.&nbsp;coli</i> and much less tested in yeast, and the source says &ldquo;exceeding 40%&rdquo;, so the optimum shown is a lower bound.</li>
+      <li><b>No module cost has been measured.</b> Where the slider sits is a what-if. Nobody knows what any of these five modules actually costs the cell, so the load cannot be derived from the design.</li>
+      <li><b>This chassis does not exist.</b> It is baker's yeast plus five proposed modules, each carrying published precedent rather than a validated construct. The cell you are orbiting is a specification.</li>
+      <li><b>The signal peptide and transmembrane calls are hydropathy heuristics</b>, marked in the readout. Real answers need SignalP and DeepTMHMM.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  Chassis definition: chassis/chassis-v1.json, schema 1.1 &middot; resolver logic matches scripts/chassis_resolve.py<br>
+  Codon adaptiveness: tRNA gene copies from GtRNAdb (sacCer3, 275 genes), wobble penalties from dos Reis et al. 2004. Verified value for value against scripts/elongation.py.<br>
+  Layer validated against Gardin et al. 2014 (eLife) per-codon residence times and Weinberg et al. 2016 (GEO GSE75897) ribosome profiling.<br>
+  Growth coupling: proteome-sector growth laws, implemented in scripts/growth_coupling.py.
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script>
+/* ---------------------------------------------------------------- project data */
+const KD={A:1.8,R:-4.5,N:-3.5,D:-3.5,C:2.5,Q:-3.5,E:-3.5,G:-0.4,H:-3.2,I:4.5,L:3.8,
+ K:-3.9,M:1.9,F:2.8,P:-1.6,S:-0.8,T:-0.7,W:-0.9,Y:-1.3,V:4.2};
+
+/* tRNA gene copies per anticodon, S. cerevisiae (GtRNAdb, sacCer3): 270 elongator
+   genes; the 5 initiator methionine genes are excluded because initiator tRNA does
+   not elongate. Mirrors params/trna-scerevisiae-gtrnadb-v1.tsv. */
+const TRNA={AGC:11,GGC:0,CGC:0,TGC:5,ACC:0,GCC:16,CCC:2,TCC:3,AGG:2,GGG:0,CGG:0,TGG:10,
+ AGT:11,GGT:0,CGT:1,TGT:4,AAC:14,GAC:0,CAC:2,TAC:2,AGA:11,GGA:0,CGA:1,TGA:3,ACT:0,GCT:4,
+ ACG:6,GCG:0,CCG:1,TCG:0,CCT:1,TCT:11,AAG:0,GAG:1,CAG:0,TAG:3,CAA:10,TAA:7,AAA:0,GAA:10,
+ ATT:0,GTT:10,CTT:14,TTT:7,ATC:0,GTC:16,CTC:2,TTC:14,ATG:0,GTG:7,CTG:1,TTG:9,AAT:13,GAT:0,
+ TAT:2,CAT:5,ATA:0,GTA:8,ACA:0,GCA:4,CCA:6};
+const S={gu:0.41,ic:0.28,ia:0.9999,ug:0.68};
+const AA1="FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
+const BASES="TCAG",CODONS=[];
+for(const a of BASES)for(const b of BASES)for(const c of BASES)CODONS.push(a+b+c);
+const CODON_AA={};CODONS.forEach((c,i)=>CODON_AA[c]=AA1[i]);
+const RCB={A:"T",T:"A",G:"C",C:"G"};
+const revcomp=s=>[...s].reverse().map(b=>RCB[b]).join("");
+
+function relAdapt(){
+  const t=CODONS.map(c=>TRNA[revcomp(c)]||0);
+  const p=[1,1,1,1,1-S.gu,1-S.ic,1-S.ia,1-S.ug];
+  const W=new Array(64).fill(0);
+  for(let i=0;i<64;i+=4){
+    W[i]  =p[0]*t[i]  +p[4]*t[i+1];
+    W[i+1]=p[1]*t[i+1]+p[5]*t[i];
+    W[i+2]=p[2]*t[i+2]+p[6]*t[i];
+    W[i+3]=p[3]*t[i+3]+p[7]*t[i+2];
+  }
+  const mi=CODONS.indexOf("ATG");W[mi]=p[3]*t[mi];
+  const skip=new Set(["TAA","TAG","TGA","ATG"]);
+  const kept=CODONS.map((c,i)=>[c,W[i]]).filter(([c])=>!skip.has(c));
+  const mx=Math.max(...kept.map(([,v])=>v));
+  const w={};kept.forEach(([c,v])=>w[c]=v/mx);
+  const nz=Object.values(w).filter(v=>v>0);
+  if(nz.length<Object.keys(w).length){
+    const gm=Math.exp(nz.reduce((s,v)=>s+Math.log(v),0)/nz.length);
+    for(const c in w)if(w[c]===0)w[c]=gm;
+  }
+  return w;
+}
+const WC=relAdapt(),BESTW={},WORSTW={};
+for(const c in WC){const a=CODON_AA[c];
+  if(!(a in BESTW)||WC[c]>BESTW[a])BESTW[a]=WC[c];
+  if(!(a in WORSTW)||WC[c]<WORSTW[a])WORSTW[a]=WC[c];}
+
+function codonRange(seq){
+  const b=[],w=[],counts={};
+  for(const a of seq){if(a==="M"||!(a in BESTW))continue;b.push(BESTW[a]);w.push(WORSTW[a]);counts[a]=(counts[a]||0)+1}
+  if(!b.length)return null;
+  const gm=x=>Math.exp(x.reduce((s,v)=>s+Math.log(v),0)/x.length);
+  return {best:gm(b),worst:gm(w),n:b.length,counts,
+    poorest:Object.keys(counts).sort((x,y)=>BESTW[x]-BESTW[y]).slice(0,3)};
+}
+
+const CAPS=[
+ {id:"A1",name:"Codon usage matched to host",status:"native",always:1,loc:"nuc"},
+ {id:"A2",name:"Promoter works in host",status:"native",always:1,loc:"nuc"},
+ {id:"A3",name:"Translation initiation",status:"native",always:1,loc:"cyt"},
+ {id:"A4",name:"Large coding sequence",status:"eng",mod:"MOD-largecds",loc:"nuc"},
+ {id:"B1",name:"Folding and chaperones",status:"native",always:1,loc:"er"},
+ {id:"B2",name:"Disulfide bond formation",status:"native",loc:"er"},
+ {id:"B3",name:"N-glycosylation present",status:"native",loc:"er"},
+ {id:"B4",name:"Human-like N-glycans",status:"eng",mod:"MOD-glycan",loc:"gol"},
+ {id:"B5",name:"O-glycosylation",status:"unknown",loc:"gol"},
+ {id:"B6",name:"Other modifications",status:"unknown",loc:"cyt"},
+ {id:"B7",name:"Protease balance",status:"native",always:1,loc:"cyt"},
+ {id:"D4",name:"Amino acid pools",status:"native",always:1,loc:"cyt"},
+ {id:"D5",name:"Sugar-nucleotide pool",status:"eng",mod:"MOD-sugarnt",loc:"gol"},
+ {id:"E3",name:"Secretion capacity",status:"eng",mod:"MOD-secretion",loc:"ves"},
+ {id:"F3",name:"Stress response",status:"native",always:1,loc:"cyt"},
+ {id:"F4",name:"Feedstock tolerance",status:"native",always:1,loc:"cyt"},
+ {id:"G1",name:"Growth and biomass",status:"native",always:1,loc:"cyt"},
+ {id:"G2",name:"Burden control",status:"eng",mod:"MOD-burden",always:1,loc:"nuc"},
+ {id:"G3",name:"Genetic stability",status:"native",always:1,loc:"nuc"},
+ {id:"G4",name:"Culture conditions",status:"native",always:1,loc:"cyt"},
+ {id:"G5",name:"Scale-up demonstrated",status:"native",always:1,loc:"cyt"},
+ {id:"G6",name:"Safety and regulatory",status:"native",always:1,loc:"cyt"}
+];
+
+const MODS={
+ "MOD-glycan":{name:"Humanised N-glycans",conf:"medium",loc:"gol",
+  goal:"Replace high-mannose yeast glycans with human-like structures, which a therapeutic needs in order not to be immunogenic.",
+  parts:"OCH1 knockout, alpha-1,2-mannosidase, GlcNAc transferase I and II, galactosyltransferase, Golgi localisation signals",
+  cost:"Cost not measured. This is the most expensive module and its burden is unknown."},
+ "MOD-sugarnt":{name:"Sugar-nucleotide supply",conf:"medium",loc:"gol",
+  goal:"Feed the humanised glycan pathway with UDP-GlcNAc and UDP-galactose at the rate it consumes them.",
+  parts:"UDP-GlcNAc pathway enzymes, UDP-Gal 4-epimerase, Golgi nucleotide-sugar transporters",
+  cost:"Cost not measured. Only needed alongside the glycan module, so their costs must be summed."},
+ "MOD-secretion":{name:"Raised secretory flux",conf:"medium",loc:"ves",
+  goal:"Push secretion above the cell's native capacity so the product leaves intact instead of jamming the pathway.",
+  parts:"signal peptide selection, ER chaperone overexpression, UPR regulator HAC1, gene dosage tuning",
+  cost:"Cost not measured. Which helpers to overexpress turns out to be protein-specific."},
+ "MOD-largecds":{name:"Large coding sequence",conf:"low",loc:"nuc",
+  goal:"Carry and express an unusually long coding sequence without truncation or recombination.",
+  parts:"assembly strategy, integration locus choice, repeat-avoiding codon design",
+  cost:"Cost not measured. The cited precedent is a multi-gene cluster, not one large protein."},
+ "MOD-burden":{name:"Burden control",conf:"low",loc:"nuc",
+  goal:"Keep total foreign expression near the productive optimum by switching modules on per product rather than running them always.",
+  parts:"inducible promoter per module, a small set of orthogonal regulators",
+  cost:"Cost not measured. Five independent switches is within routine reach."}
+};
+
+const PROTEINS=[
+ {n:"Preproinsulin",t:"110 aa · 3 disulfides",cls:"therapeutic",sec:1,
+  s:"MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN"},
+ {n:"Erythropoietin",t:"166 aa · 3 sequons",cls:"therapeutic",sec:1,
+  s:"APPRLICDSRVLERYLLEAKEAENITTGCAEHCSLNENITVPDTKVNFYAWKRMEVGQQAVEVWQGLALLSEAVLRGQALLVNSSQPWEPLQLHVDKAVSGLRSLTTLLRALGAQKEAISPPDAASAAPLRTITADTFRKLFRVYSNFLRGKLKLYTGEACRTGDR"},
+ {n:"Growth hormone",t:"191 aa · no glycans",cls:"therapeutic",sec:1,
+  s:"FPTIPLSRLFDNAMLRAHRLHQLAFDTYQEFEEAYIPKEQKYSFLQNPQTSLCFSESIPTPSNREETQQKSNLELLRISLLLIQSWLEPVQFLRSVFANSLVYGASDSNVYDLLKDLEEGIQTLMGRLEDGSPRTGQIFKQTYSKFDTNSHNDDALLKNYGLLYCFRKDMDKVETFLRIVQCRSVEGSCGF"},
+ {n:"Hen lysozyme",t:"129 aa · 4 disulfides",cls:"enzyme",sec:1,
+  s:"KVFGRCELAAAMKRHGLDNYRGYSLGNWVCAAKFESNFNTQATNRNTDGSTDYGILQINSRWWCNDGRTPGSRNLCNIPCSALLSSDITASVNCAKKIVSDGNGMNAWVAWRNRCKGTDVQAWIRGCRL"}
+];
+
+const meanKD=s=>{let t=0,n=0;for(const c of s){if(c in KD){t+=KD[c];n++}}return n?t/n:0};
+
+function featuresOf(raw){
+  const seq=raw.toUpperCase().replace(/[^A-Z]/g,"");
+  const n=seq.length,pos=[];
+  for(let i=0;i<n-2;i++)if(seq[i]==="N"&&seq[i+1]!=="P"&&(seq[i+2]==="S"||seq[i+2]==="T"))pos.push(i+1);
+  const cys=(seq.match(/C/g)||[]).length;
+  let sigH=0;
+  for(let i=0;i<=Math.min(22,Math.max(n-9,0));i++)sigH=Math.max(sigH,meanKD(seq.slice(i,i+9)));
+  const sig=n>30&&sigH>1.6;
+  let tm=0,i=sig?25:0;
+  while(i<=n-19){if(meanKD(seq.slice(i,i+19))>1.6){tm++;i+=19}else i++}
+  const bad=[...new Set([...seq].filter(c=>!(c in KD)))];
+  return {seq,len:n,cys,pairs:Math.floor(cys/2),sequons:pos.length,pos,sig,tm,bad,cr:codonRange(seq)};
+}
+
+function resolve(f,cls,sec){
+  const out={};
+  for(const c of CAPS){
+    if(c.status==="unknown"){out[c.id]={state:"unknown",why:"not computable from sequence"};continue}
+    let why=null;
+    if(c.always)why="every product needs this";
+    else if(c.id==="B2"&&f.pairs>=1)why=f.cys+" cysteines, up to "+f.pairs+" pairs";
+    else if(c.id==="B3"&&f.sequons>=1)why=f.sequons+" N-X-S/T sequon"+(f.sequons>1?"s":"");
+    else if(c.id==="B4"&&f.sequons>=1&&cls==="therapeutic")why="glycosylated therapeutic";
+    else if(c.id==="A4"&&f.len>1000)why=f.len+" aa is beyond the routine range";
+    else if(c.id==="E3"&&sec)why="product is secreted";
+    out[c.id]=why?{state:c.status,why,mod:c.mod}:{state:"off",why:"not required"};
+  }
+  if(out.B4.state==="eng")out.D5={state:"eng",why:"feeds the glycan module",mod:"MOD-sugarnt"};
+  return out;
+}
+
+/* --------------------------------------------------------------- growth physics */
+const PHI_MAX=40,OPT=PHI_MAX/2;
+const growthOf=t=>Math.max(0,1-t/PHI_MAX);
+const prodOf=t=>t*growthOf(t);
+const PROD_BEST=prodOf(OPT);
+
+/* ------------------------------------------------------------------- 3D chamber */
+const el=id=>document.getElementById(id);
+const R=10;                                 // cell radius, scene units
+const STOPS=[                               // the secretory route, in order
+ {k:"nuc",p:[0,.6,0],      t:1.5},
+ {k:"nuc",p:[2.5,1.3,1.4], t:.9},
+ {k:"cyt",p:[4.3,.5,2.6],  t:1.2},
+ {k:"er", p:[5.5,-.7,1.2], t:1.8},
+ {k:"gol",p:[3.3,3.3,-2.2],t:1.1},
+ {k:"gol",p:[5.1,3.7,-3.5],t:1.5},
+ {k:"ves",p:[6.7,-2.3,-3.0],t:1.2},
+ {k:"out",p:[13.5,-4.0,-4.2],t:1.4}
+];
+const LABELS=[
+ {k:"nuc",txt:"nucleus · A1 A2 A3",p:[0,4.4,0]},
+ {k:"er", txt:"ER · folding, disulfides",p:[6.4,-2.2,1.6]},
+ {k:"gol",txt:"Golgi · glycans",p:[4.2,5.4,-2.8]},
+ {k:"ves",txt:"vesicle · E3",p:[7.4,-4.2,-3.2]},
+ {k:"cyt",txt:"cytosol · ribosomes",p:[-5.6,-3.6,3.2]},
+ {k:"out",txt:"medium",p:[13.8,-1.8,-4.2]}
+];
+
+let three=null, paused=false, reduce=false;
+try{reduce=matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){}
+
+function glowTexture(){
+  const c=document.createElement("canvas");c.width=c.height=64;
+  const g=c.getContext("2d").createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.35,"rgba(255,255,255,.45)");
+  g.addColorStop(1,"rgba(255,255,255,0)");
+  const x=c.getContext("2d");x.fillStyle=g;x.fillRect(0,0,64,64);
+  return new THREE.CanvasTexture(c);
+}
+
+function buildScene(){
+  if(typeof THREE==="undefined")return null;
+  const cv=el("cv");
+  const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  if("outputEncoding" in renderer && THREE.sRGBEncoding!==undefined)renderer.outputEncoding=THREE.sRGBEncoding;
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x070b10,0.016);
+  const cam=new THREE.PerspectiveCamera(42,2,0.1,400);
+
+  const GLOW=glowTexture();
+  const spr=(color,size,pos)=>{
+    const s=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color,transparent:true,
+      blending:THREE.AdditiveBlending,depthWrite:false}));
+    s.scale.setScalar(size);if(pos)s.position.set(...pos);return s;
+  };
+
+  /* lights */
+  scene.add(new THREE.AmbientLight(0x6f8ea0,0.55));
+  const key=new THREE.PointLight(0x9fe8ff,1.1,80);key.position.set(16,18,16);scene.add(key);
+  const fill=new THREE.PointLight(0xe3a54f,0.55,70);fill.position.set(-14,-8,-12);scene.add(fill);
+  const rim=new THREE.DirectionalLight(0x3fbf9a,0.3);rim.position.set(-8,4,-14);scene.add(rim);
+
+  /* the cell: wall, membrane, and a faint lattice so the surface reads as a surface */
+  const cell=new THREE.Group();scene.add(cell);
+  const wall=new THREE.Mesh(new THREE.IcosahedronGeometry(R,4),
+    new THREE.MeshPhongMaterial({color:0x7fa8bd,transparent:true,opacity:.055,
+      shininess:60,side:THREE.DoubleSide,depthWrite:false}));
+  cell.add(wall);
+  const lat=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(R*1.004,2)),
+    new THREE.LineBasicMaterial({color:0x2b4e60,transparent:true,opacity:.5}));
+  cell.add(lat);
+  const inner=new THREE.Mesh(new THREE.SphereGeometry(R*.955,32,24),
+    new THREE.MeshPhongMaterial({color:0x4d7f94,transparent:true,opacity:.05,
+      side:THREE.BackSide,depthWrite:false}));
+  cell.add(inner);
+
+  /* nucleus with a double helix inside */
+  const nuc=new THREE.Group();cell.add(nuc);
+  nuc.add(new THREE.Mesh(new THREE.SphereGeometry(3.3,30,22),
+    new THREE.MeshPhongMaterial({color:0xa98be0,transparent:true,opacity:.13,
+      shininess:40,depthWrite:false})));
+  nuc.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(3.32,14,10)),
+    new THREE.LineBasicMaterial({color:0x6f5aa0,transparent:true,opacity:.34})));
+  const helix=new THREE.Group();nuc.add(helix);
+  for(const ph of [0,Math.PI]){
+    const pts=[];
+    for(let i=0;i<=120;i++){const u=i/120,a=u*Math.PI*5+ph;
+      pts.push(new THREE.Vector3(Math.cos(a)*1.5,(u-.5)*4.6,Math.sin(a)*1.5))}
+    helix.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),80,.1,6,false),
+      new THREE.MeshPhongMaterial({color:0xc4aef0,emissive:0x3b2d5c,shininess:70})));
+  }
+  for(let i=0;i<14;i++){
+    const u=i/13,a=u*Math.PI*5;
+    const rung=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,3,5),
+      new THREE.MeshPhongMaterial({color:0x8f77c7,transparent:true,opacity:.75}));
+    rung.position.set(0,(u-.5)*4.6,0);rung.rotation.z=Math.PI/2;rung.rotation.y=-a;
+    helix.add(rung);
+  }
+
+  /* ER: a tube that winds out from the nuclear envelope, plus flattened cisternae */
+  const erPts=[];
+  for(let i=0;i<=140;i++){const u=i/140,a=u*Math.PI*3.1-0.5;
+    const rad=3.6+u*3.0;
+    erPts.push(new THREE.Vector3(Math.cos(a)*rad, Math.sin(u*Math.PI*2.4)*1.9-0.4, Math.sin(a)*rad*.82));}
+  const erCurve=new THREE.CatmullRomCurve3(erPts);
+  const er=new THREE.Mesh(new THREE.TubeGeometry(erCurve,160,.46,10,false),
+    new THREE.MeshPhongMaterial({color:0x3fbf9a,transparent:true,opacity:.3,shininess:50,
+      side:THREE.DoubleSide}));
+  cell.add(er);
+  const erLine=new THREE.Mesh(new THREE.TubeGeometry(erCurve,160,.5,6,false),
+    new THREE.MeshBasicMaterial({color:0x3fbf9a,wireframe:true,transparent:true,opacity:.14}));
+  cell.add(erLine);
+
+  /* ribosomes studding the ER, as one instanced mesh */
+  const RIBO=74;
+  const ribo=new THREE.InstancedMesh(new THREE.SphereGeometry(.17,8,6),
+    new THREE.MeshPhongMaterial({color:0x8fd8ff,emissive:0x16414f,shininess:80}),RIBO);
+  const m4=new THREE.Matrix4();
+  for(let i=0;i<RIBO;i++){
+    const u=(i+.5)/RIBO,base=erCurve.getPointAt(u*.98);
+    const tan=erCurve.getTangentAt(u*.98);
+    const nrm=new THREE.Vector3(0,1,0).cross(tan).normalize();
+    const bin=new THREE.Vector3().crossVectors(tan,nrm).normalize();
+    const a=i*2.399;
+    const off=nrm.clone().multiplyScalar(Math.cos(a)*.52).add(bin.clone().multiplyScalar(Math.sin(a)*.52));
+    m4.makeTranslation(base.x+off.x,base.y+off.y,base.z+off.z);
+    ribo.setMatrixAt(i,m4);
+  }
+  ribo.instanceMatrix.needsUpdate=true;
+  cell.add(ribo);
+
+  /* Golgi: a stack of flattened discs, shrinking outward */
+  const gol=new THREE.Group();gol.position.set(4.2,3.4,-2.9);gol.rotation.set(.35,.5,-.25);cell.add(gol);
+  for(let i=0;i<5;i++){
+    const rr=2.05-i*.3;
+    const disc=new THREE.Mesh(new THREE.TorusGeometry(rr,.17,8,34),
+      new THREE.MeshPhongMaterial({color:0xe3a54f,transparent:true,opacity:.42,shininess:60}));
+    disc.position.y=i*.46-.9;disc.rotation.x=Math.PI/2;
+    gol.add(disc);
+  }
+  const golGlow=spr(0xe3a54f,3.2);gol.add(golGlow);
+
+  /* vesicle */
+  const ves=new THREE.Mesh(new THREE.SphereGeometry(.95,20,14),
+    new THREE.MeshPhongMaterial({color:0x9fb3c0,transparent:true,opacity:.2,
+      shininess:40,depthWrite:false}));
+  ves.position.set(6.7,-2.3,-3.0);cell.add(ves);
+  const vesWire=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(.97,10,7)),
+    new THREE.LineBasicMaterial({color:0x46606f,transparent:true,opacity:.4}));
+  vesWire.position.copy(ves.position);cell.add(vesWire);
+
+  /* the product, with modification slots that fill as it travels */
+  const cargo=new THREE.Group();scene.add(cargo);
+  const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.46,1),
+    new THREE.MeshPhongMaterial({color:0x6fd8e8,emissive:0x1b6f80,shininess:95}));
+  cargo.add(core);
+  cargo.add(spr(0x6fd8e8,2.6));
+  const staples=new THREE.Group();cargo.add(staples);
+  const glycans=new THREE.Group();cargo.add(glycans);
+
+  /* module beacons, one per compartment that can carry an engineered module */
+  const beaconAt={nuc:[0,-4.4,0],gol:[4.2,6.0,-2.9],ves:[7.0,-4.0,-3.0],er:[6.2,-3.0,1.4],cyt:[-5.0,-5.0,2.6]};
+  const beacons={};
+  for(const k in beaconAt){
+    const g=new THREE.Group();g.position.set(...beaconAt[k]);g.visible=false;cell.add(g);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.8,.055,6,28),
+      new THREE.MeshBasicMaterial({color:0xe3a54f,transparent:true,opacity:.85}));
+    ring.rotation.x=Math.PI/2;g.add(ring);
+    g.add(spr(0xe3a54f,2.2));
+    beacons[k]={g,ring};
+  }
+
+  /* buds: division made visible. Rate comes from the growth law. */
+  const buds=[];
+  for(let i=0;i<3;i++){
+    const b=new THREE.Mesh(new THREE.SphereGeometry(1,18,13),
+      new THREE.MeshPhongMaterial({color:0x7fa8bd,transparent:true,opacity:.09,
+        shininess:50,depthWrite:false}));
+    const bw=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.004,1)),
+      new THREE.LineBasicMaterial({color:0x2b4e60,transparent:true,opacity:.42}));
+    const g=new THREE.Group();g.add(b);g.add(bw);g.visible=false;scene.add(g);
+    buds.push({g,phase:i/3,dir:new THREE.Vector3(
+      Math.cos(i*2.1)*.8,Math.sin(i*1.3)*.55,Math.sin(i*2.7)*.8).normalize()});
+  }
+
+  /* hand-rolled orbit: no extra dependency, and it behaves the same on touch */
+  const ctr=new THREE.Vector3(2.6,0,-0.6);
+  let yaw=-0.62, pitch=0.28, dist=30, drag=null;
+  const place=()=>{
+    const cp=Math.cos(pitch);
+    cam.position.set(ctr.x+dist*cp*Math.sin(yaw), ctr.y+dist*Math.sin(pitch), ctr.z+dist*cp*Math.cos(yaw));
+    cam.lookAt(ctr);
+  };
+  const stage=el("stage");
+  stage.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};stage.setPointerCapture(e.pointerId)});
+  stage.addEventListener("pointermove",e=>{
+    if(!drag)return;
+    yaw-=(e.clientX-drag.x)*0.0062;
+    pitch=Math.max(-1.25,Math.min(1.25,pitch+(e.clientY-drag.y)*0.0052));
+    drag={x:e.clientX,y:e.clientY};place();
+  });
+  const stop=e=>{if(drag){try{stage.releasePointerCapture(e.pointerId)}catch(_){}drag=null}};
+  stage.addEventListener("pointerup",stop);stage.addEventListener("pointercancel",stop);
+  stage.addEventListener("wheel",e=>{
+    e.preventDefault();dist=Math.max(14,Math.min(64,dist+e.deltaY*0.022));place();
+  },{passive:false});
+
+  const resize=()=>{
+    const w=el("cv").clientWidth||600,h=el("cv").clientHeight||480;
+    renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();place();
+  };
+  window.addEventListener("resize",resize);
+
+  const labelEls={};
+  for(const L of LABELS){
+    const d=document.createElement("div");d.className="lbl";d.textContent=L.txt;
+    stage.appendChild(d);labelEls[L.k]=d;
+  }
+
+  three={renderer,scene,cam,cell,nuc,helix,gol,golGlow,ves,vesWire,cargo,core,staples,glycans,
+    beacons,buds,labelEls,resize,place,ribo,er,
+    get yaw(){return yaw},set yaw(v){yaw=v}};
+  resize();
+  return three;
+}
+
+/* modification geometry rebuilt whenever the target changes */
+function dressCargo(f,r){
+  if(!three)return;
+  const {staples,glycans}=three;
+  const clear=g=>{while(g.children.length){const c=g.children.pop();
+    if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose();}};
+  clear(staples);clear(glycans);
+
+  const nS=Math.min(f.pairs,6);
+  for(let i=0;i<nS;i++){
+    const a=i/Math.max(nS,1)*Math.PI*2;
+    const bar=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.62,5),
+      new THREE.MeshPhongMaterial({color:0xf2d98a,emissive:0x5d4b14,shininess:90}));
+    bar.position.set(Math.cos(a)*.52,Math.sin(a*1.7)*.26,Math.sin(a)*.52);
+    bar.rotation.set(Math.PI/2.4,a,0);
+    bar.visible=false;staples.add(bar);
+  }
+
+  const nG=Math.min(f.sequons,5);
+  const humanised=r.B4.state==="eng";
+  const col=humanised?0xe3a54f:0x3fbf9a;
+  for(let i=0;i<nG;i++){
+    const a=i/Math.max(nG,1)*Math.PI*2+0.7;
+    const t=new THREE.Group();
+    const stem=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,.46,5),
+      new THREE.MeshPhongMaterial({color:col,emissive:0x1d2a1f,shininess:70}));
+    stem.position.y=.23;t.add(stem);
+    for(let b=0;b<3;b++){
+      const br=new THREE.Mesh(new THREE.SphereGeometry(.1,7,5),
+        new THREE.MeshPhongMaterial({color:col,emissive:0x22301f,shininess:80}));
+      const ba=b/3*Math.PI*2;
+      br.position.set(Math.cos(ba)*.19,.52,Math.sin(ba)*.19);t.add(br);
+      if(humanised){
+        const tip=new THREE.Mesh(new THREE.SphereGeometry(.07,6,5),
+          new THREE.MeshPhongMaterial({color:0xf0c988,emissive:0x4a3610,shininess:90}));
+        tip.position.set(Math.cos(ba)*.3,.72,Math.sin(ba)*.3);t.add(tip);
+      }
+    }
+    t.position.set(Math.cos(a)*.42,.2,Math.sin(a)*.42);
+    t.lookAt(t.position.clone().multiplyScalar(2.4));
+    t.rotateX(Math.PI/2);
+    t.visible=false;glycans.add(t);
+  }
+}
+
+/* ------------------------------------------------------------------- transit */
+let state={seq:null,name:"",idx:undefined,f:null,r:null,cls:"therapeutic",sec:true};
+let tr={i:0,u:0,cycles:0,divisions:0,budT:0};
+
+function say(html){
+  const lg=el("log");
+  const d=document.createElement("div");d.innerHTML=html;lg.appendChild(d);
+  while(lg.children.length>26)lg.removeChild(lg.firstChild);
+  lg.scrollTop=lg.scrollHeight;
+}
+
+function stageEnter(i){
+  const f=state.f,r=state.r;if(!f)return;
+  const staples=three?three.staples:{children:[]};
+  const glycans=three?three.glycans:{children:[]};
+  if(i===0){
+    say("<u>cycle "+(tr.cycles+1)+"</u> &middot; <b>nucleus</b> transcription begins, A1 A2 A3 native");
+    staples.children.forEach(c=>c.visible=false);
+    glycans.children.forEach(c=>c.visible=false);
+    if(r.A4.state==="eng")say("<i>nucleus</i> "+f.len+" aa needs MOD-largecds");
+  }
+  if(i===1)say("<b>nucleus</b> message exported through the pore");
+  if(i===2){
+    say("<b>cytosol</b> ribosome engaged, "+f.len+" codons to read");
+    if(f.cr)say("<b>cytosol</b> codon adaptiveness "+f.cr.best.toFixed(3)+
+      " best reachable &middot; no rate implied");
+    if(f.sig)say("<b>cytosol</b> signal peptide recognised, routed to the ER <span style='color:var(--unknown)'>[heuristic]</span>");
+    else say("<b>cytosol</b> no signal peptide found <span style='color:var(--unknown)'>[heuristic]</span>");
+  }
+  if(i===3){
+    say("<b>ER</b> chaperones engaged, B1 native");
+    if(f.pairs){
+      staples.children.forEach((c,k)=>setTimeout(()=>{c.visible=true},k*150));
+      say("<b>ER</b> "+f.pairs+" disulfide pair"+(f.pairs>1?"s":"")+" formed, B2 native");
+    } else say("<b>ER</b> no cysteine pairs, B2 not required");
+    if(f.sequons){
+      glycans.children.forEach((c,k)=>setTimeout(()=>{c.visible=true},200+k*140));
+      say("<b>ER</b> core glycans attached at "+f.sequons+" sequon"+(f.sequons>1?"s":"")+", B3 native");
+    }
+  }
+  if(i===4&&f.sequons)say("<b>Golgi</b> glycan processing starts");
+  if(i===5){
+    if(r.B4.state==="eng"){
+      say("<i>Golgi</i> yeast glycans are high-mannose and immunogenic &mdash; MOD-glycan required");
+      say("<i>Golgi</i> MOD-sugarnt required to feed it");
+    } else if(f.sequons) say("<b>Golgi</b> glycans left as yeast makes them");
+    else say("<b>Golgi</b> nothing to modify");
+  }
+  if(i===6){
+    if(state.sec)say("<i>vesicle</i> packaged for export, E3 above native capacity");
+    else say("<b>vesicle</b> product retained &mdash; recovery needs cell lysis");
+  }
+  if(i===7)say("<u>medium</u> product secreted &middot; <b>titre not predicted, no model wired in</b>");
+}
+
+/* ----------------------------------------------------------------- rendering UI */
+function renderChips(){
+  const c=el("chips");c.innerHTML="";
+  PROTEINS.forEach((p,i)=>{
+    const b=document.createElement("button");
+    b.className="chip";b.type="button";b.setAttribute("aria-pressed","false");
+    b.innerHTML=p.n+"<small>"+p.t+"</small>";
+    b.onclick=()=>{el("pclass").value=p.cls;el("secreted").checked=!!p.sec;el("custom").value="";
+      load(p.s,p.n,i)};
+    c.appendChild(b);
+  });
+}
+const markChip=i=>[...el("chips").children].forEach((b,j)=>
+  b.setAttribute("aria-pressed",j===i?"true":"false"));
+
+const row=(k,v,h)=>'<div class="'+(h?"heur":"")+'" style="display:contents"><dt>'+k+
+  (h?'<span class="tag">HEURISTIC</span>':'')+'</dt><dd>'+v+'</dd></div>';
+
+function renderFeat(f){
+  el("feat").innerHTML=
+    row("Length",f.len+" aa")+
+    row("Cysteines",f.cys+" ("+f.pairs+" pairs)")+
+    row("N-glyc sequons",f.sequons+(f.pos.length?" @ "+f.pos.slice(0,4).join(", ")+(f.pos.length>4?"…":""):""))+
+    row("Signal peptide",f.sig?"yes":"no",1)+
+    row("TM segments",String(f.tm),1)+
+    row("O-glycosylation","unknown")+
+    row("Other modifications","unknown")+
+    (f.cr?row("Codon adaptiveness",f.cr.best.toFixed(3)+" / "+f.cr.worst.toFixed(3))+
+      row("Design headroom",(f.cr.best/f.cr.worst).toFixed(2)+"×")+
+      row("Worst-served residues",f.cr.poorest.map(a=>a+"×"+f.cr.counts[a]).join(", ")):"")+
+    (f.bad.length?row("Non-standard residues",f.bad.join(" ")):"");
+}
+
+function renderCaps(r){
+  const g=el("caps");g.innerHTML="";
+  let nat=0,eng=0,unk=0;
+  for(const c of CAPS){
+    const s=r[c.id],d=document.createElement("div");
+    let cls="cap";
+    if(s.state==="native"){cls+=" nat";nat++}
+    else if(s.state==="eng"){cls+=" eng";eng++}
+    else if(s.state==="unknown"){cls+=" unk";unk++}
+    else cls+=" off";
+    d.className=cls;
+    d.innerHTML='<div class="cid">'+c.id+'</div><div class="cname">'+c.name+
+      '</div><div class="why">'+s.why+'</div>';
+    g.appendChild(d);
+  }
+  el("capCount").textContent=nat+" native · "+eng+" need engineering · "+unk+
+    " unknown · "+(CAPS.length-nat-eng-unk)+" not needed, out of 22 in the protein set";
+  return {nat,eng,unk};
+}
+
+function renderMods(r){
+  const ids=[...new Set(Object.values(r).filter(s=>s.state==="eng"&&s.mod).map(s=>s.mod))].sort();
+  const w=el("mods");w.innerHTML="";
+  for(const id of ids){
+    const m=MODS[id],d=document.createElement("div");d.className="mod";
+    d.innerHTML='<div class="mid">'+id+' <span class="conf">'+m.conf+' confidence</span></div><h3>'+
+      m.name+'</h3><p>'+m.goal+'</p><div class="parts"><b>Parts:</b> '+m.parts+
+      '</div><div class="cost">'+m.cost+'</div>';
+    w.appendChild(d);
+  }
+  el("modCount").textContent=ids.length+" module"+(ids.length===1?"":"s")+
+    " for this product. Every one is a proposal, not a validated construct.";
+  if(three){
+    for(const k in three.beacons)three.beacons[k].g.visible=false;
+    for(const id of ids){const k=MODS[id].loc;if(three.beacons[k])three.beacons[k].g.visible=true}
+  }
+  return ids.length;
+}
+
+function renderStatus(){
+  const t=+el("load").value, g=growthOf(t), p=prodOf(t)/PROD_BEST*100;
+  const mods=state.r?[...new Set(Object.values(state.r).filter(s=>s.state==="eng"&&s.mod)
+    .map(s=>s.mod))].length:0;
+  el("status").innerHTML=[
+    ["specimen",state.name||"—"],
+    ["transit cycles",String(tr.cycles)],
+    ["divisions",String(tr.divisions)],
+    ["modules engineered",String(mods)],
+    ["growth rate",(g*100).toFixed(0)+"% of unburdened"],
+    ["productivity",(p||0).toFixed(0)+"% of best reachable"]
+  ].map(([k,v])=>'<div class="stat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>').join("");
+}
+
+function renderGrowth(){
+  const t=+el("load").value, g=growthOf(t), p=prodOf(t)/PROD_BEST;
+  el("loadOut").textContent=t+"%";
+  const mods=state.r?[...new Set(Object.values(state.r).filter(s=>s.state==="eng"&&s.mod)
+    .map(s=>s.mod))].length:0;
+  let verdict;
+  if(t>=PHI_MAX)verdict="growth has stopped, yield is zero";
+  else if(t>OPT*1.25)verdict="past the optimum";
+  else if(t<OPT*0.6)verdict="headroom unused";
+  else verdict="near the optimum";
+  el("gfeat").innerHTML=
+    row("Foreign protein",t+"% of cell protein")+
+    row("Growth rate",(g*100).toFixed(0)+"%")+
+    row("Productivity",(p*100).toFixed(0)+"% of best")+
+    row("Verdict",verdict)+
+    row("Optimum",OPT+"%")+
+    row("Zero-yield ceiling",PHI_MAX+"%")+
+    (mods?row("Per module at optimum",(OPT/mods).toFixed(1)+"%"):"");
+  drawGrowth();
+}
+
+function drawGrowth(){
+  const cv=el("gcv");if(!cv)return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const w=cv.clientWidth||520,h=cv.clientHeight||190;
+  cv.width=w*dpr;cv.height=h*dpr;
+  const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+  const L=40,Rr=14,T=16,B=30, pw=w-L-Rr, ph=h-T-B;
+  const px=t=>L+t/48*pw, py=v=>T+ph-v*ph;
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  x.strokeStyle=css("--line-2");x.lineWidth=1;
+  x.beginPath();x.moveTo(L,T);x.lineTo(L,T+ph);x.lineTo(L+pw,T+ph);x.stroke();
+
+  x.strokeStyle=css("--ink-3");x.setLineDash([3,4]);x.lineWidth=1;
+  for(const t of [OPT,PHI_MAX]){x.beginPath();x.moveTo(px(t),T);x.lineTo(px(t),T+ph);x.stroke()}
+  x.setLineDash([]);
+
+  x.strokeStyle=css("--ink-3");x.lineWidth=1.4;x.globalAlpha=.7;
+  x.beginPath();
+  for(let t=0;t<=48;t++){const v=growthOf(t);t?x.lineTo(px(t),py(v)):x.moveTo(px(t),py(v))}
+  x.stroke();x.globalAlpha=1;
+
+  x.strokeStyle=css("--native");x.lineWidth=2.4;
+  x.beginPath();
+  for(let t=0;t<=48;t++){const v=prodOf(t)/PROD_BEST;t?x.lineTo(px(t),py(v)):x.moveTo(px(t),py(v))}
+  x.stroke();
+
+  const cur=+el("load").value;
+  x.fillStyle=css("--eng");
+  x.beginPath();x.arc(px(cur),py(prodOf(cur)/PROD_BEST),4.5,0,7);x.fill();
+
+  x.fillStyle=css("--ink-3");x.font='10px "IBM Plex Mono",monospace';
+  x.textAlign="center";
+  x.fillText("0%",L,h-12);x.fillText("20%",px(OPT),h-12);x.fillText("40%",px(PHI_MAX),h-12);
+  x.textAlign="right";
+  x.fillText("none",L-6,py(0)+3);x.fillText("most",L-6,py(1)+3);
+  x.textAlign="left";
+  x.fillStyle=css("--native");x.fillText("harvested product",L+8,T+11);
+  x.fillStyle=css("--ink-3");x.fillText("growth rate",L+8,T+24);
+}
+
+/* ------------------------------------------------------------------- main load */
+function load(seq,name,idx){
+  const f=featuresOf(seq);
+  if(!f.len){say("No amino acid residues found in that input.");return}
+  state.seq=f.seq;state.name=name;state.idx=idx;
+  state.cls=el("pclass").value;state.sec=el("secreted").checked;
+  state.f=f;state.r=resolve(f,state.cls,state.sec);
+  markChip(idx===undefined?-1:idx);
+  renderFeat(f);renderCaps(state.r);renderMods(state.r);
+  dressCargo(f,state.r);
+  tr={i:0,u:0,cycles:0,divisions:0,budT:0};
+  el("log").innerHTML="";
+  stageEnter(0);
+  renderStatus();renderGrowth();
+}
+const rerun=()=>{if(state.seq)load(state.seq,state.name,state.idx)};
+
+/* ------------------------------------------------------------------- the clock */
+const easeIO=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+let last=performance.now();
+
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt=Math.min((now-last)/1000,0.1);last=now;
+  if(!three||paused||document.hidden)return;
+
+  const t=+el("load").value, g=growthOf(t);
+  const steps=state.sec?STOPS.length:7;
+
+  /* cargo along the route */
+  tr.u+=dt/(STOPS[tr.i].t*(reduce?1.8:1));
+  if(tr.u>=1){
+    tr.u=0;tr.i++;
+    if(tr.i>=steps){tr.i=0;tr.cycles++;renderStatus()}
+    stageEnter(tr.i);
+  }
+  const a=STOPS[tr.i].p, b=STOPS[(tr.i+1)%STOPS.length].p;
+  const e=easeIO(tr.u);
+  const hold=(tr.i===steps-1&&!state.sec);
+  three.cargo.position.set(
+    hold?a[0]:a[0]+(b[0]-a[0])*e,
+    hold?a[1]:a[1]+(b[1]-a[1])*e,
+    hold?a[2]:a[2]+(b[2]-a[2])*e);
+  if(!reduce){
+    three.cargo.rotation.y+=dt*1.1;three.cargo.rotation.x+=dt*.5;
+    three.helix.rotation.y+=dt*.22;
+    three.cell.rotation.y+=dt*.035;
+    for(const k in three.beacons){
+      const bc=three.beacons[k];
+      bc.ring.rotation.z+=dt*1.6;
+      bc.ring.scale.setScalar(1+Math.sin(now/420)*.09);
+    }
+    three.golGlow.material.opacity=.5+Math.sin(now/700)*.18;
+  }
+
+  /* compartment labels follow the geometry, and light up when the cargo is there */
+  const here=STOPS[tr.i].k;
+  const v=new THREE.Vector3(), cvEl=el("cv");
+  const w=cvEl.clientWidth,h=cvEl.clientHeight;
+  for(const L of LABELS){
+    const d=three.labelEls[L.k];if(!d)continue;
+    v.set(...L.p).applyMatrix4(three.cell.matrixWorld).project(three.cam);
+    const sx=(v.x*.5+.5)*w, sy=(-v.y*.5+.5)*h;
+    const vis=v.z<1&&sx>-40&&sx<w+40&&sy>-20&&sy<h+20;
+    d.style.left=sx+"px";d.style.top=sy+"px";
+    d.style.opacity=vis?(L.k===here?"1":".52"):"0";
+    const engHere=(L.k==="gol"&&state.r&&state.r.B4.state==="eng")||
+                  (L.k==="ves"&&state.r&&state.r.E3.state==="eng");
+    d.className="lbl"+(L.k===here?" on":"")+(engHere?" eng":"");
+  }
+
+  /* division: the growth law, made physical. At the ceiling nothing buds. */
+  if(g>0){
+    tr.budT+=dt*g;
+    for(const bd of three.buds){
+      const u=((tr.budT*0.26)+bd.phase)%1;
+      bd.g.visible=true;
+      const s=u<.78?(u/.78)*R*0.62:R*0.62;
+      bd.g.scale.setScalar(Math.max(0.001,s));
+      const push=R*0.9+ (u<.78? u*R*0.2 : (u-.78)/.22*R*1.9);
+      bd.g.position.copy(bd.dir).multiplyScalar(push).applyMatrix4(
+        new THREE.Matrix4().extractRotation(three.cell.matrixWorld));
+      bd.g.children[0].material.opacity=u<.78?.09:.09*(1-(u-.78)/.22);
+      bd.g.children[1].material.opacity=u<.78?.42:.42*(1-(u-.78)/.22);
+      if(u<bd.last)tr.divisions++, renderStatus();
+      bd.last=u;
+    }
+  } else {
+    for(const bd of three.buds)bd.g.visible=false;
+  }
+
+  three.renderer.render(three.scene,three.cam);
+}
+
+/* -------------------------------------------------------------------- wire up */
+renderChips();
+if(buildScene()){
+  requestAnimationFrame(tick);
+}else{
+  el("fb").style.display="grid";
+  el("cv").style.display="none";
+}
+el("run").onclick=()=>{
+  const raw=el("custom").value, lines=raw.split("\n");
+  const body=lines.filter(l=>!l.startsWith(">")).join("");
+  const hdr=(lines.find(l=>l.startsWith(">"))||"").replace(/^>/,"").trim();
+  if(body.replace(/[^A-Za-z]/g,"").length)load(body,hdr||"Pasted sequence",undefined);
+  else say("Paste a sequence first, or pick one above.");
+};
+el("pclass").onchange=rerun;
+el("secreted").onchange=rerun;
+el("load").oninput=()=>{renderGrowth();renderStatus()};
+el("pause").onclick=()=>{
+  paused=!paused;el("pause").textContent=paused?"Resume":"Pause";
+  if(!paused)last=performance.now();
+};
+window.addEventListener("resize",drawGrowth);
+load(PROTEINS[1].s,PROTEINS[1].n,1);
+if(three)three.renderer.render(three.scene,three.cam);
+</script>
