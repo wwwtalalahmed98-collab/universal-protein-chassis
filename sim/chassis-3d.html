@@ -2,18 +2,18 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: an observation chamber. Full-bleed specimen viewport with projected
-   compartment labels, a telemetry rail beside it, then the capability lattice,
-   the growth-law plot, and the limits panel. Committed single dark world: this
-   is an instrument looking into a cell, and it should look the same to everyone. */
+/* Layout: an observation chamber. Specimen viewport with a tool strip and a
+   transit scrubber under it, an inspector and telemetry rail beside it, then the
+   capability lattice, the growth-law plot and the limits panel. Committed single
+   dark world: this is an instrument looking into a cell. */
 :root{
-  --void:#070B10; --chamber:#0C131A; --panel:#111A22; --panel-2:#16212B;
+  --void:#060A0F; --chamber:#0B1219; --panel:#101922; --panel-2:#15202A;
   --ink:#E4EDF2; --ink-2:#9FB3C0; --ink-3:#6B8290;
-  --line:#1E2C38; --line-2:#2B3F4E;
-  --native:#3FBF9A; --native-dim:#14433A;
-  --eng:#E3A54F; --eng-dim:#44320F;
-  --unknown:#DC8871; --unknown-dim:#43211A;
-  --product:#6FD8E8; --dna:#A98BE0;
+  --line:#1D2B37; --line-2:#2A3E4D;
+  --native:#3FBF9A; --native-dim:#133F37;
+  --eng:#E3A54F; --eng-dim:#42300E;
+  --unknown:#DC8871; --unknown-dim:#412019;
+  --product:#6FD8E8; --dna:#A98BE0; --vac:#5C8FA8;
   --font-display:'Archivo',system-ui,sans-serif;
   --font-body:'Source Serif 4',Georgia,serif;
   --font-data:'IBM Plex Mono',ui-monospace,monospace;
@@ -25,7 +25,7 @@ body{background:var(--void);color:var(--ink);font-family:var(--font-body);line-h
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:24px 56px}
-.wrap{max-width:1180px;margin:0 auto}
+.wrap{max-width:1240px;margin:0 auto}
 h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance}
 h1{font-size:clamp(25px,4.2vw,38px);font-weight:700;letter-spacing:-.022em;line-height:1.06}
 h2{font-size:13px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-2)}
@@ -33,88 +33,108 @@ h3{font-size:15px;font-weight:600;letter-spacing:-.008em}
 .mono{font-family:var(--font-data);font-variant-numeric:tabular-nums}
 .eyebrow{font-family:var(--font-data);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--product)}
 header{border-bottom:1px solid var(--line);padding-bottom:18px}
-header .sub{color:var(--ink-2);max-width:66ch;margin:9px 0 0;font-size:16px}
-section{margin-top:28px}
+header .sub{color:var(--ink-2);max-width:68ch;margin:9px 0 0;font-size:16px}
+section{margin-top:26px}
 .sechead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .sechead p{margin:0;color:var(--ink-3);font-size:13.5px;font-family:var(--font-display)}
 
-/* status strip */
-.status{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 11px;min-width:0}
-.stat .k{font-family:var(--font-data);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
-.stat .v{font-family:var(--font-data);font-size:15px;font-variant-numeric:tabular-nums;margin-top:1px}
+.status{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+.stat .k{font-family:var(--font-data);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-family:var(--font-data);font-size:14.5px;font-variant-numeric:tabular-nums;margin-top:1px}
 
-/* chamber */
-.chamber{display:grid;grid-template-columns:1fr 316px;gap:14px;align-items:start}
-@media (max-width:900px){.chamber{grid-template-columns:1fr}}
-.stage{position:relative;background:
-   radial-gradient(130% 100% at 50% 0%,#101C26 0%,var(--void) 72%);
-  border:1px solid var(--line-2);border-radius:14px;overflow:hidden;min-width:0}
-#cv{display:block;width:100%;height:520px}
-@media (max-width:900px){#cv{height:400px}}
-@media (max-width:420px){#cv{height:330px}}
+.chamber{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
+@media (max-width:980px){.chamber{grid-template-columns:1fr}}
+.stage{background:var(--chamber);border:1px solid var(--line-2);border-radius:14px;overflow:hidden;min-width:0}
+.view{position:relative;background:radial-gradient(130% 105% at 50% -5%,#0F1C26 0%,var(--void) 70%)}
+#cv{display:block;width:100%;height:540px;cursor:grab;touch-action:none}
+#cv.grabbing{cursor:grabbing}
+#cv.pickable{cursor:pointer}
+@media (max-width:980px){#cv{height:420px}}
+@media (max-width:430px){#cv{height:340px}}
 .lbl{position:absolute;transform:translate(-50%,-50%);pointer-events:none;
-  font-family:var(--font-data);font-size:10.5px;letter-spacing:.07em;white-space:nowrap;
+  font-family:var(--font-data);font-size:10.5px;letter-spacing:.06em;white-space:nowrap;
   padding:2px 7px;border-radius:5px;border:1px solid var(--line-2);
-  background:rgba(7,11,16,.74);color:var(--ink-2);transition:opacity .3s;backdrop-filter:blur(2px)}
+  background:rgba(6,10,15,.76);color:var(--ink-2);transition:opacity .25s}
 .lbl.on{color:var(--ink);border-color:var(--native)}
 .lbl.eng{color:var(--eng);border-color:var(--eng)}
-.hint{position:absolute;right:10px;bottom:9px;font-family:var(--font-data);font-size:10px;
+.hint{position:absolute;right:10px;bottom:8px;font-family:var(--font-data);font-size:10px;
   color:var(--ink-3);pointer-events:none}
-.legend3{position:absolute;left:12px;bottom:9px;display:flex;gap:12px;flex-wrap:wrap;
+.legend3{position:absolute;left:12px;bottom:8px;display:flex;gap:11px;flex-wrap:wrap;
   font-family:var(--font-data);font-size:10px;color:var(--ink-3);pointer-events:none}
-.legend3 i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+.legend3 i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
 .fallback{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px;
   font-family:var(--font-display);font-size:14px;color:var(--ink-2)}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:9px 11px;border-top:1px solid var(--line);
+  background:var(--panel)}
+.tool{font-family:var(--font-display);font-size:11.5px;font-weight:500;padding:5px 9px;border-radius:7px;
+  border:1px solid var(--line-2);background:var(--panel-2);color:var(--ink-2);cursor:pointer;transition:.13s}
+.tool:hover{border-color:var(--product);color:var(--ink)}
+.tool[aria-pressed="true"]{background:var(--product);border-color:var(--product);color:#05222A}
+.tool.sep{border:0;background:0;color:var(--ink-3);cursor:default;padding:5px 2px;
+  font-family:var(--font-data);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+.tool.sep:hover{color:var(--ink-3)}
+.scrubrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+  padding:8px 11px 11px;background:var(--panel);border-top:1px solid var(--line)}
+.scrubrow .nm{font-family:var(--font-data);font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+#scrub{width:100%;accent-color:var(--product)}
 
-/* rail */
 .rail{display:flex;flex-direction:column;gap:12px;min-width:0}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px}
 .card>h3{margin-bottom:3px}
 .card .note{color:var(--ink-3);font-size:12.5px;margin:0 0 10px;font-family:var(--font-display)}
+.card.insp{border-color:var(--product)}
+.card.insp h3{color:var(--product)}
 dl.feat{display:grid;grid-template-columns:1fr auto;gap:3px 12px;margin:0;font-size:13px}
 dl.feat dt{color:var(--ink-2);font-family:var(--font-display);min-width:0}
 dl.feat dd{margin:0;font-family:var(--font-data);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 dl.feat .heur dt,dl.feat .heur dd{color:var(--ink-3)}
 .tag{font-family:var(--font-data);font-size:9px;letter-spacing:.07em;padding:1px 4px;border-radius:4px;
   background:var(--unknown-dim);color:var(--unknown);margin-left:5px;vertical-align:1px}
+.ilist{display:flex;flex-direction:column;gap:4px;margin:9px 0 0}
+.irow{display:grid;grid-template-columns:30px 1fr;gap:7px;font-size:12px;align-items:baseline}
+.irow .ic{font-family:var(--font-data);font-size:10.5px}
+.irow.nat .ic{color:var(--native)} .irow.eng .ic{color:var(--eng)}
+.irow.unk .ic{color:var(--unknown)} .irow.off{opacity:.42}
+.irow .it{font-family:var(--font-display);color:var(--ink-2);line-height:1.35}
 #log{font-family:var(--font-data);font-size:11px;line-height:1.7;color:var(--ink-2);margin:0;
-  max-height:166px;overflow-y:auto}
-#log div{opacity:0;animation:fade .28s forwards;padding:1px 0}
+  max-height:160px;overflow-y:auto}
+#log div{opacity:0;animation:fade .26s forwards;padding:1px 0}
 @keyframes fade{to{opacity:1}}
 #log b{color:var(--native);font-weight:500}
 #log i{color:var(--eng);font-style:normal}
 #log u{color:var(--product);text-decoration:none}
 
-/* controls */
 .ctrls{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px;
-  display:flex;flex-direction:column;gap:12px}
+  display:flex;flex-direction:column;gap:11px}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 button.chip{font-family:var(--font-display);font-size:13px;font-weight:500;padding:8px 12px;border-radius:999px;
   border:1px solid var(--line-2);background:var(--panel-2);color:var(--ink);cursor:pointer;transition:.14s;text-align:left}
 button.chip:hover{border-color:var(--product)}
-button.chip[aria-pressed="true"]{background:var(--product);border-color:var(--product);color:#06222A}
+button.chip[aria-pressed="true"]{background:var(--product);border-color:var(--product);color:#05222A}
 button.chip small{display:block;font-family:var(--font-data);font-size:10px;opacity:.75;font-weight:400}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
 label.opt{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);font-family:var(--font-display)}
 select,textarea{font-family:var(--font-data);font-size:12px;padding:7px 9px;border:1px solid var(--line-2);
   border-radius:8px;background:var(--panel-2);color:var(--ink)}
-textarea{flex:1 1 260px;min-width:0;min-height:54px;resize:vertical}
+textarea{flex:1 1 250px;min-width:0;min-height:52px;resize:vertical}
 .btn{font-family:var(--font-display);font-weight:600;font-size:13px;padding:9px 14px;border-radius:8px;
-  cursor:pointer;border:1px solid var(--product);background:var(--product);color:#06222A}
+  cursor:pointer;border:1px solid var(--product);background:var(--product);color:#05222A}
 .btn.ghost{background:transparent;color:var(--product)}
-input[type=range]{width:100%;accent-color:var(--eng)}
+input[type=range]{width:100%}
+#load{accent-color:var(--eng)}
 .slab{display:grid;grid-template-columns:1fr auto;gap:4px;align-items:baseline}
 .slab span{font-family:var(--font-display);font-size:13px;color:var(--ink-2)}
 .slab b{font-family:var(--font-data);font-size:13px}
 
-/* lattice */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:7px}
-.cap{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--panel);min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:7px}
+.cap{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--panel);min-width:0;
+  cursor:pointer;transition:.13s;text-align:left;font:inherit;color:inherit}
+.cap:hover{border-color:var(--product)}
 .cap .cid{font-family:var(--font-data);font-size:10px;letter-spacing:.06em;color:var(--ink-3)}
 .cap .cname{font-family:var(--font-display);font-size:12.5px;font-weight:500;line-height:1.3;margin-top:2px}
 .cap .why{font-family:var(--font-data);font-size:10px;color:var(--ink-3);margin-top:4px;line-height:1.45}
-.cap.off{opacity:.38}
+.cap.off{opacity:.4}
 .cap.nat{background:var(--native-dim);border-color:var(--native)}
 .cap.nat .cid{color:var(--native)}
 .cap.eng{background:var(--eng-dim);border-color:var(--eng)}
@@ -129,8 +149,7 @@ input[type=range]{width:100%;accent-color:var(--eng)}
 .sw.u{background:var(--unknown-dim);border-color:var(--unknown);border-style:dashed}
 .sw.o{background:var(--panel);border-color:var(--line)}
 
-/* modules */
-.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(266px,1fr));gap:11px}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(262px,1fr));gap:11px}
 .mod{border:1px solid var(--eng);border-radius:11px;background:var(--panel);padding:13px;min-width:0}
 .mod .mid{font-family:var(--font-data);font-size:10.5px;color:var(--eng);letter-spacing:.06em}
 .mod h3{margin:3px 0 6px}
@@ -141,19 +160,18 @@ input[type=range]{width:100%;accent-color:var(--eng)}
 .conf{font-family:var(--font-data);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 5px;
   border-radius:4px;border:1px solid currentColor;color:var(--ink-3)}
 
-/* growth */
 .growthwrap{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
 @media (max-width:760px){.growthwrap{grid-template-columns:1fr}}
 #gcv{display:block;width:100%;height:190px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
 
-/* limits */
 .limits{background:var(--unknown-dim);border:1px solid var(--unknown);border-radius:12px;padding:17px}
 .limits h2{color:var(--unknown)}
 .limits ul{margin:11px 0 0;padding-left:19px;font-size:14px}
 .limits li{margin-bottom:7px}
 .limits li b{font-weight:600;color:var(--ink)}
-footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--font-data);
+footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--font-data);
   font-size:11px;color:var(--ink-3);line-height:1.8}
+:focus-visible{outline:2px solid var(--product);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){#log div{animation:none;opacity:1}.lbl{transition:none}}
 </style>
 
@@ -161,23 +179,52 @@ footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-fa
 <header>
   <div class="eyebrow">UCP-1 &middot; Saccharomyces cerevisiae &middot; specimen does not exist</div>
   <h1>UCP-1 Vivarium</h1>
-  <p class="sub">A living view of the chassis this project has been designing. Pick a protein and the cell reconfigures: the compartments that have to act light up, the modifications the product needs are built onto it as it travels, and the engineered parts the yeast does not already have are marked in amber. Drag to orbit, scroll to zoom. Everything you see is computed from the project's own data &mdash; and nothing here has been built in a laboratory.</p>
+  <p class="sub">A living view of the chassis this project has been designing. Pick a protein and the cell reconfigures: the compartments that have to act light up, the modifications the product needs are built onto it as it travels, and the parts the yeast does not already have are marked in amber. <b style="color:var(--ink)">Click any organelle to inspect it.</b> Drag to orbit, scroll to zoom, cut the cell open with Cross-section. Everything you see is computed from the project's own data, and nothing here has been built in a laboratory.</p>
   <div class="status" id="status"></div>
 </header>
 
 <section class="chamber">
-  <div class="stage" id="stage">
-    <canvas id="cv"></canvas>
-    <div class="fallback" id="fb">The 3D view could not load its renderer.<br>Everything below still works.</div>
-    <div class="legend3">
-      <span><i style="background:var(--native)"></i>native to yeast</span>
-      <span><i style="background:var(--eng)"></i>engineered in</span>
-      <span><i style="background:var(--product)"></i>the product</span>
+  <div class="stage">
+    <div class="view" id="view">
+      <canvas id="cv"></canvas>
+      <div class="fallback" id="fb">The 3D view could not load its renderer.<br>Everything below still works.</div>
+      <div class="legend3">
+        <span><i style="background:var(--native)"></i>native to yeast</span>
+        <span><i style="background:var(--eng)"></i>engineered in</span>
+        <span><i style="background:var(--product)"></i>the product</span>
+      </div>
+      <div class="hint">drag &middot; scroll &middot; click an organelle</div>
     </div>
-    <div class="hint">drag to orbit &middot; scroll to zoom</div>
+    <div class="toolbar">
+      <button class="tool" id="tPause" type="button" aria-pressed="false">Pause</button>
+      <button class="tool" id="tStep" type="button">Step</button>
+      <span class="tool sep">speed</span>
+      <button class="tool" id="tS05" type="button" aria-pressed="false">0.5&times;</button>
+      <button class="tool" id="tS1" type="button" aria-pressed="true">1&times;</button>
+      <button class="tool" id="tS2" type="button" aria-pressed="false">2&times;</button>
+      <span class="tool sep">view</span>
+      <button class="tool" id="tClip" type="button" aria-pressed="false">Cross-section</button>
+      <button class="tool" id="tFollow" type="button" aria-pressed="false">Follow product</button>
+      <button class="tool" id="tSpin" type="button" aria-pressed="true">Auto-spin</button>
+      <button class="tool" id="tLbl" type="button" aria-pressed="true">Labels</button>
+      <button class="tool" id="tOrg" type="button" aria-pressed="true">Organelles</button>
+      <button class="tool" id="tRibo" type="button" aria-pressed="true">Ribosomes</button>
+      <button class="tool" id="tReset" type="button">Reset view</button>
+    </div>
+    <div class="scrubrow">
+      <span class="nm" id="scrubName">transit</span>
+      <input type="range" id="scrub" min="0" max="1000" step="1" value="0" aria-label="Scrub the product through the secretory route">
+      <span class="nm" id="scrubPct">0%</span>
+    </div>
   </div>
 
   <div class="rail">
+    <div class="card insp" id="inspCard">
+      <h3 id="inspTitle">Nucleus</h3>
+      <p class="note" id="inspNote">Click an organelle in the cell, or a capability below.</p>
+      <div class="ilist" id="inspList"></div>
+    </div>
+
     <div class="ctrls">
       <div class="chips" id="chips"></div>
       <div class="row">
@@ -190,7 +237,6 @@ footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-fa
             <option value="other">other</option>
           </select>
         </label>
-        <button class="btn ghost" id="pause" type="button">Pause</button>
       </div>
       <div class="row">
         <textarea id="custom" placeholder="Or paste an amino acid sequence"></textarea>
@@ -199,7 +245,7 @@ footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-fa
       <div>
         <div class="slab"><span>Proteome given to the foreign product</span><b class="mono" id="loadOut">8%</b></div>
         <input type="range" id="load" min="0" max="48" step="1" value="8">
-        <div class="slab" style="margin-top:4px"><span style="font-size:12px;color:var(--ink-3)">Division rate follows the growth law. At 40% it stops.</span></div>
+        <div class="slab" style="margin-top:3px"><span style="font-size:12px;color:var(--ink-3)">Division rate follows the growth law. At 40% it stops.</span></div>
       </div>
     </div>
 
@@ -249,12 +295,12 @@ footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-fa
   <div class="limits">
     <h2>What this cannot tell you</h2>
     <ul>
-      <li><b>The geometry is schematic.</b> Compartment shapes and positions are drawn to be read, not to be structurally accurate. The topology of the route &mdash; nucleus, ER, Golgi, vesicle, out &mdash; is the part that is correct.</li>
-      <li><b>No titre, no yield, no probability of success.</b> The staples and glycan trees you watch being attached are counts read off the sequence, not a prediction that the cell will attach them successfully.</li>
+      <li><b>The geometry is schematic.</b> Organelle shapes, sizes and positions are drawn to be read, not to be structurally accurate. What is correct is the inventory &mdash; a budding yeast really is dominated by a large vacuole, with a nucleus, a perinuclear ER, Golgi cisternae, mitochondria and chitin bud scars &mdash; and the topology of the route: nucleus, ER, Golgi, vesicle, out.</li>
+      <li><b>No titre, no yield, no probability of success.</b> The staples and glycan trees you watch being attached are counts read off the sequence, not a prediction that the cell will attach them successfully. The export counter counts transit cycles in this animation and is not a yield.</li>
       <li><b>Codon adaptiveness ranks codons and cannot give a rate.</b> It is computed from 275 yeast tRNA genes and agrees with measured per-codon decoding speed at &rho;&nbsp;=&nbsp;&minus;0.62. But its predicted spread between best and worst codon is about 27,000&times; where the measured spread is 2.7&times;, so nothing in this page moves faster or slower because of it.</li>
       <li><b>Only 1 of 22 capabilities has quantitative physics behind it.</b> That is A1. The other 21 are categorical judgements, and six of the thresholds driving them have no published source at all &mdash; including the round 1000-residue number that decides whether a module gets built.</li>
       <li><b>The division rate is first-order physics.</b> Growth is taken to fall linearly with foreign protein and reach zero at 40%. That shape is well supported in <i>E.&nbsp;coli</i> and much less tested in yeast, and the source says &ldquo;exceeding 40%&rdquo;, so the optimum shown is a lower bound.</li>
-      <li><b>No module cost has been measured.</b> Where the slider sits is a what-if. Nobody knows what any of these five modules actually costs the cell, so the load cannot be derived from the design.</li>
+      <li><b>No module cost has been measured.</b> Where the load slider sits is a what-if. Nobody knows what any of these five modules actually costs the cell, so the load cannot be derived from the design.</li>
       <li><b>This chassis does not exist.</b> It is baker's yeast plus five proposed modules, each carrying published precedent rather than a validated construct. The cell you are orbiting is a specification.</li>
       <li><b>The signal peptide and transmembrane calls are hydropathy heuristics</b>, marked in the readout. Real answers need SignalP and DeepTMHMM.</li>
     </ul>
@@ -338,18 +384,18 @@ const CAPS=[
  {id:"B4",name:"Human-like N-glycans",status:"eng",mod:"MOD-glycan",loc:"gol"},
  {id:"B5",name:"O-glycosylation",status:"unknown",loc:"gol"},
  {id:"B6",name:"Other modifications",status:"unknown",loc:"cyt"},
- {id:"B7",name:"Protease balance",status:"native",always:1,loc:"cyt"},
- {id:"D4",name:"Amino acid pools",status:"native",always:1,loc:"cyt"},
+ {id:"B7",name:"Protease balance",status:"native",always:1,loc:"vac"},
+ {id:"D4",name:"Amino acid pools",status:"native",always:1,loc:"vac"},
  {id:"D5",name:"Sugar-nucleotide pool",status:"eng",mod:"MOD-sugarnt",loc:"gol"},
  {id:"E3",name:"Secretion capacity",status:"eng",mod:"MOD-secretion",loc:"ves"},
  {id:"F3",name:"Stress response",status:"native",always:1,loc:"cyt"},
- {id:"F4",name:"Feedstock tolerance",status:"native",always:1,loc:"cyt"},
- {id:"G1",name:"Growth and biomass",status:"native",always:1,loc:"cyt"},
+ {id:"F4",name:"Feedstock tolerance",status:"native",always:1,loc:"mem"},
+ {id:"G1",name:"Growth and biomass",status:"native",always:1,loc:"mit"},
  {id:"G2",name:"Burden control",status:"eng",mod:"MOD-burden",always:1,loc:"nuc"},
  {id:"G3",name:"Genetic stability",status:"native",always:1,loc:"nuc"},
- {id:"G4",name:"Culture conditions",status:"native",always:1,loc:"cyt"},
- {id:"G5",name:"Scale-up demonstrated",status:"native",always:1,loc:"cyt"},
- {id:"G6",name:"Safety and regulatory",status:"native",always:1,loc:"cyt"}
+ {id:"G4",name:"Culture conditions",status:"native",always:1,loc:"mem"},
+ {id:"G5",name:"Scale-up demonstrated",status:"native",always:1,loc:"mem"},
+ {id:"G6",name:"Safety and regulatory",status:"native",always:1,loc:"mem"}
 ];
 
 const MODS={
@@ -373,6 +419,19 @@ const MODS={
   goal:"Keep total foreign expression near the productive optimum by switching modules on per product rather than running them always.",
   parts:"inducible promoter per module, a small set of orthogonal regulators",
   cost:"Cost not measured. Five independent switches is within routine reach."}
+};
+
+/* compartments: what each one is, and where the camera sits to look at it */
+const COMPS={
+ nuc:{name:"Nucleus",desc:"Where the gene sits and is transcribed. A real yeast nucleus is about 2 µm across and stays enclosed through division.",cam:{yaw:-0.5,pitch:0.2,dist:19,ctr:[0,0.4,0]}},
+ er:{name:"Endoplasmic reticulum",desc:"Continuous with the nuclear envelope and spread under the plasma membrane. Folding, disulfide bonds and core glycans happen here.",cam:{yaw:-1.05,pitch:0.1,dist:22,ctr:[4.6,-0.4,1.4]}},
+ gol:{name:"Golgi cisternae",desc:"In budding yeast the Golgi is scattered as individual cisternae rather than one stack. Glycans are matured here.",cam:{yaw:-2.2,pitch:0.42,dist:17,ctr:[4.2,3.4,-2.9]}},
+ ves:{name:"Secretory vesicle",desc:"Carries the finished product to the plasma membrane and fuses with it. This is the step MOD-secretion pushes on.",cam:{yaw:-2.5,pitch:-0.3,dist:16,ctr:[6.7,-2.3,-3.0]}},
+ vac:{name:"Vacuole",desc:"The largest organelle in a budding yeast cell. Degradation, amino acid storage and pH balance. It is also where a mis-routed product gets destroyed.",cam:{yaw:1.1,pitch:0.15,dist:24,ctr:[-3.6,1.2,1.0]}},
+ mit:{name:"Mitochondria",desc:"A tubular network, not separate beans. They pay for everything the cell does, including making your protein.",cam:{yaw:2.3,pitch:-0.3,dist:22,ctr:[-2.4,-4.2,-2.6]}},
+ cyt:{name:"Cytosol",desc:"Ribosomes, chaperones, proteases and the free amino acid pool. Translation starts here before the product enters the ER.",cam:{yaw:-0.2,pitch:-0.18,dist:30,ctr:[2.6,0,-0.6]}},
+ mem:{name:"Cell wall and membrane",desc:"A rigid chitin and glucan wall over a lipid bilayer. Bud scars are the chitin rings left behind by previous divisions.",cam:{yaw:-0.62,pitch:0.1,dist:34,ctr:[2.6,0,-0.6]}},
+ out:{name:"Culture medium",desc:"Where a secreted product ends up and where it would be harvested from. Titre is what you would measure here, and this page does not predict it.",cam:{yaw:-1.6,pitch:-0.1,dist:40,ctr:[8,-2,-3]}}
 };
 
 const PROTEINS=[
@@ -427,36 +486,66 @@ const PROD_BEST=prodOf(OPT);
 
 /* ------------------------------------------------------------------- 3D chamber */
 const el=id=>document.getElementById(id);
-const R=10;                                 // cell radius, scene units
-const STOPS=[                               // the secretory route, in order
- {k:"nuc",p:[0,.6,0],      t:1.5},
+const R=10;
+const STOPS=[
+ {k:"nuc",p:[0,.6,0],      t:1.6},
  {k:"nuc",p:[2.5,1.3,1.4], t:.9},
- {k:"cyt",p:[4.3,.5,2.6],  t:1.2},
- {k:"er", p:[5.5,-.7,1.2], t:1.8},
+ {k:"cyt",p:[4.3,.5,2.6],  t:1.3},
+ {k:"er", p:[5.5,-.7,1.2], t:1.9},
  {k:"gol",p:[3.3,3.3,-2.2],t:1.1},
- {k:"gol",p:[5.1,3.7,-3.5],t:1.5},
+ {k:"gol",p:[5.1,3.7,-3.5],t:1.6},
  {k:"ves",p:[6.7,-2.3,-3.0],t:1.2},
- {k:"out",p:[13.5,-4.0,-4.2],t:1.4}
+ {k:"out",p:[13.5,-4.0,-4.2],t:1.5}
 ];
 const LABELS=[
- {k:"nuc",txt:"nucleus · A1 A2 A3",p:[0,4.4,0]},
- {k:"er", txt:"ER · folding, disulfides",p:[6.4,-2.2,1.6]},
- {k:"gol",txt:"Golgi · glycans",p:[4.2,5.4,-2.8]},
- {k:"ves",txt:"vesicle · E3",p:[7.4,-4.2,-3.2]},
- {k:"cyt",txt:"cytosol · ribosomes",p:[-5.6,-3.6,3.2]},
- {k:"out",txt:"medium",p:[13.8,-1.8,-4.2]}
+ {k:"nuc",txt:"nucleus · A1 A2 A3",p:[0,4.6,0]},
+ {k:"er", txt:"ER · folding, disulfides",p:[6.6,-2.4,1.6]},
+ {k:"gol",txt:"Golgi · glycans",p:[4.2,5.6,-2.8]},
+ {k:"ves",txt:"vesicle · E3",p:[7.6,-4.2,-3.2]},
+ {k:"vac",txt:"vacuole · B7 D4",p:[-3.6,5.6,1.0]},
+ {k:"mit",txt:"mitochondria · G1",p:[-2.6,-6.6,-2.6]},
+ {k:"cyt",txt:"cytosol · ribosomes",p:[6.2,2.4,4.2]},
+ {k:"out",txt:"medium",p:[13.8,-1.6,-4.2]}
 ];
 
-let three=null, paused=false, reduce=false;
+let three=null, paused=false, reduce=false, speed=1, spin=true, follow=false, clip=false;
+let showLbl=true, showOrg=true, showRibo=true, picked="nuc", scrubbing=false;
 try{reduce=matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){}
+if(reduce)spin=false;
 
 function glowTexture(){
   const c=document.createElement("canvas");c.width=c.height=64;
-  const g=c.getContext("2d").createRadialGradient(32,32,0,32,32,32);
-  g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.35,"rgba(255,255,255,.45)");
+  const x=c.getContext("2d");
+  const g=x.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.3,"rgba(255,255,255,.5)");
   g.addColorStop(1,"rgba(255,255,255,0)");
-  const x=c.getContext("2d");x.fillStyle=g;x.fillRect(0,0,64,64);
+  x.fillStyle=g;x.fillRect(0,0,64,64);
   return new THREE.CanvasTexture(c);
+}
+
+/* a fresnel shell: the single biggest realism win for a cell, because a real one
+   reads as a glassy edge rather than a flat ball */
+function rimMaterial(color,power,strength,side){
+  return new THREE.ShaderMaterial({
+    uniforms:{uColor:{value:new THREE.Color(color)},uPow:{value:power},uStr:{value:strength}},
+    vertexShader:`
+      varying vec3 vN; varying vec3 vV;
+      void main(){
+        vec4 wp=modelMatrix*vec4(position,1.0);
+        vN=normalize(mat3(modelMatrix)*normal);
+        vV=normalize(cameraPosition-wp.xyz);
+        gl_Position=projectionMatrix*viewMatrix*wp;
+      }`,
+    fragmentShader:`
+      uniform vec3 uColor; uniform float uPow; uniform float uStr;
+      varying vec3 vN; varying vec3 vV;
+      void main(){
+        float f=pow(1.0-abs(dot(normalize(vN),normalize(vV))),uPow);
+        gl_FragColor=vec4(uColor,f*uStr);
+      }`,
+    transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,
+    side:side||THREE.FrontSide
+  });
 }
 
 function buildScene(){
@@ -464,52 +553,102 @@ function buildScene(){
   const cv=el("cv");
   const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.localClippingEnabled=true;
   if("outputEncoding" in renderer && THREE.sRGBEncoding!==undefined)renderer.outputEncoding=THREE.sRGBEncoding;
   const scene=new THREE.Scene();
-  scene.fog=new THREE.FogExp2(0x070b10,0.016);
+  scene.fog=new THREE.FogExp2(0x060a0f,0.0145);
   const cam=new THREE.PerspectiveCamera(42,2,0.1,400);
 
   const GLOW=glowTexture();
-  const spr=(color,size,pos)=>{
+  const spr=(color,size,pos,op)=>{
     const s=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color,transparent:true,
-      blending:THREE.AdditiveBlending,depthWrite:false}));
+      opacity:op===undefined?1:op,blending:THREE.AdditiveBlending,depthWrite:false}));
     s.scale.setScalar(size);if(pos)s.position.set(...pos);return s;
   };
 
+  /* the clipping plane used by Cross-section. Only the outer shells and the
+     vacuole are clipped, so the small organelles stay whole and readable. */
+  const plane=new THREE.Plane(new THREE.Vector3(0,0,-1),0);
+  const clipped=[];
+
   /* lights */
-  scene.add(new THREE.AmbientLight(0x6f8ea0,0.55));
-  const key=new THREE.PointLight(0x9fe8ff,1.1,80);key.position.set(16,18,16);scene.add(key);
-  const fill=new THREE.PointLight(0xe3a54f,0.55,70);fill.position.set(-14,-8,-12);scene.add(fill);
-  const rim=new THREE.DirectionalLight(0x3fbf9a,0.3);rim.position.set(-8,4,-14);scene.add(rim);
+  scene.add(new THREE.AmbientLight(0x6b8a9c,0.5));
+  const key=new THREE.PointLight(0xb6ecff,1.15,90);key.position.set(17,19,17);scene.add(key);
+  const fill=new THREE.PointLight(0xe3a54f,0.5,74);fill.position.set(-15,-9,-13);scene.add(fill);
+  const rim=new THREE.DirectionalLight(0x3fbf9a,0.28);rim.position.set(-8,4,-15);scene.add(rim);
 
-  /* the cell: wall, membrane, and a faint lattice so the surface reads as a surface */
   const cell=new THREE.Group();scene.add(cell);
-  const wall=new THREE.Mesh(new THREE.IcosahedronGeometry(R,4),
-    new THREE.MeshPhongMaterial({color:0x7fa8bd,transparent:true,opacity:.055,
-      shininess:60,side:THREE.DoubleSide,depthWrite:false}));
-  cell.add(wall);
-  const lat=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(R*1.004,2)),
-    new THREE.LineBasicMaterial({color:0x2b4e60,transparent:true,opacity:.5}));
-  cell.add(lat);
-  const inner=new THREE.Mesh(new THREE.SphereGeometry(R*.955,32,24),
-    new THREE.MeshPhongMaterial({color:0x4d7f94,transparent:true,opacity:.05,
-      side:THREE.BackSide,depthWrite:false}));
-  cell.add(inner);
+  const picks=[];
+  const addPick=(key,radius,pos)=>{
+    const m=new THREE.Mesh(new THREE.SphereGeometry(radius,10,8),
+      new THREE.MeshBasicMaterial({visible:false}));
+    m.position.set(...pos);m.userData.key=key;cell.add(m);picks.push(m);return m;
+  };
 
-  /* nucleus with a double helix inside */
+  /* --- cell wall and plasma membrane, as two shells with a gap between them --- */
+  const wallMat=new THREE.MeshPhongMaterial({color:0x8fb6ca,transparent:true,opacity:.05,
+    shininess:70,side:THREE.DoubleSide,depthWrite:false});
+  const wall=new THREE.Mesh(new THREE.IcosahedronGeometry(R,4),wallMat);cell.add(wall);
+  const wallRim=new THREE.Mesh(new THREE.SphereGeometry(R*1.012,48,32),
+    rimMaterial(0x7fd4ea,2.6,0.5));cell.add(wallRim);
+  const memMat=new THREE.MeshPhongMaterial({color:0x5f93ab,transparent:true,opacity:.085,
+    shininess:90,side:THREE.DoubleSide,depthWrite:false});
+  const mem=new THREE.Mesh(new THREE.SphereGeometry(R*.945,48,32),memMat);cell.add(mem);
+  const lat=new THREE.LineSegments(
+    new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(R*1.003,2)),
+    new THREE.LineBasicMaterial({color:0x2b5062,transparent:true,opacity:.46}));cell.add(lat);
+  clipped.push(wallMat,memMat);
+  addPick("mem",R*1.02,[0,0,0]).userData.outer=true;
+
+  /* membrane proteins and transporters dotted through the bilayer */
+  const MP=120;
+  const mp=new THREE.InstancedMesh(new THREE.CylinderGeometry(.12,.12,.78,5),
+    new THREE.MeshPhongMaterial({color:0x9ad6e8,emissive:0x16414f,shininess:80}),MP);
+  const mm=new THREE.Matrix4(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),sc=new THREE.Vector3(1,1,1);
+  for(let i=0;i<MP;i++){
+    const y=1-(i+.5)/MP*2, rr=Math.sqrt(1-y*y), th=i*2.39996;
+    const d=new THREE.Vector3(Math.cos(th)*rr,y,Math.sin(th)*rr);
+    q.setFromUnitVectors(up,d);
+    mm.compose(d.clone().multiplyScalar(R*.972),q,sc);
+    mp.setMatrixAt(i,mm);
+  }
+  mp.instanceMatrix.needsUpdate=true;cell.add(mp);
+
+  /* bud scars: the chitin rings a mother cell keeps after each division */
+  const scars=new THREE.Group();cell.add(scars);
+  for(let i=0;i<5;i++){
+    const th=i*2.39996, y=1-(i+.6)/5*1.7, rr=Math.sqrt(Math.max(.02,1-y*y));
+    const d=new THREE.Vector3(Math.cos(th)*rr,y,Math.sin(th)*rr);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.62,.085,6,22),
+      new THREE.MeshPhongMaterial({color:0xcfe3ea,transparent:true,opacity:.42,shininess:60}));
+    ring.position.copy(d).multiplyScalar(R*.995);
+    ring.lookAt(d.clone().multiplyScalar(R*1.2));
+    scars.add(ring);
+  }
+
+  /* --- nucleus: envelope, pores, double helix --- */
   const nuc=new THREE.Group();cell.add(nuc);
-  nuc.add(new THREE.Mesh(new THREE.SphereGeometry(3.3,30,22),
-    new THREE.MeshPhongMaterial({color:0xa98be0,transparent:true,opacity:.13,
-      shininess:40,depthWrite:false})));
-  nuc.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(3.32,14,10)),
-    new THREE.LineBasicMaterial({color:0x6f5aa0,transparent:true,opacity:.34})));
+  nuc.add(new THREE.Mesh(new THREE.SphereGeometry(3.3,36,26),
+    new THREE.MeshPhongMaterial({color:0xa98be0,transparent:true,opacity:.1,
+      shininess:50,depthWrite:false})));
+  nuc.add(new THREE.Mesh(new THREE.SphereGeometry(3.36,40,28),rimMaterial(0xbda2ef,2.2,0.55)));
+  nuc.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(3.32,16,11)),
+    new THREE.LineBasicMaterial({color:0x6f5aa0,transparent:true,opacity:.3})));
+  for(let i=0;i<14;i++){
+    const th=i*2.39996, y=1-(i+.5)/14*2, rr=Math.sqrt(Math.max(.01,1-y*y));
+    const d=new THREE.Vector3(Math.cos(th)*rr,y,Math.sin(th)*rr);
+    const pore=new THREE.Mesh(new THREE.TorusGeometry(.26,.07,6,14),
+      new THREE.MeshPhongMaterial({color:0xd3c2f5,emissive:0x2e2347,shininess:70}));
+    pore.position.copy(d).multiplyScalar(3.3);pore.lookAt(d.clone().multiplyScalar(5));
+    nuc.add(pore);
+  }
   const helix=new THREE.Group();nuc.add(helix);
   for(const ph of [0,Math.PI]){
     const pts=[];
     for(let i=0;i<=120;i++){const u=i/120,a=u*Math.PI*5+ph;
       pts.push(new THREE.Vector3(Math.cos(a)*1.5,(u-.5)*4.6,Math.sin(a)*1.5))}
     helix.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),80,.1,6,false),
-      new THREE.MeshPhongMaterial({color:0xc4aef0,emissive:0x3b2d5c,shininess:70})));
+      new THREE.MeshPhongMaterial({color:0xcbb6f5,emissive:0x3b2d5c,shininess:80})));
   }
   for(let i=0;i<14;i++){
     const u=i/13,a=u*Math.PI*5;
@@ -518,117 +657,236 @@ function buildScene(){
     rung.position.set(0,(u-.5)*4.6,0);rung.rotation.z=Math.PI/2;rung.rotation.y=-a;
     helix.add(rung);
   }
+  addPick("nuc",3.4,[0,0,0]);
 
-  /* ER: a tube that winds out from the nuclear envelope, plus flattened cisternae */
+  /* --- ER: perinuclear, winding outward toward the membrane --- */
   const erPts=[];
-  for(let i=0;i<=140;i++){const u=i/140,a=u*Math.PI*3.1-0.5;
-    const rad=3.6+u*3.0;
-    erPts.push(new THREE.Vector3(Math.cos(a)*rad, Math.sin(u*Math.PI*2.4)*1.9-0.4, Math.sin(a)*rad*.82));}
+  for(let i=0;i<=140;i++){const u=i/140,a=u*Math.PI*3.1-0.5,rad=3.7+u*3.0;
+    erPts.push(new THREE.Vector3(Math.cos(a)*rad,Math.sin(u*Math.PI*2.4)*1.9-0.4,Math.sin(a)*rad*.82));}
   const erCurve=new THREE.CatmullRomCurve3(erPts);
-  const er=new THREE.Mesh(new THREE.TubeGeometry(erCurve,160,.46,10,false),
-    new THREE.MeshPhongMaterial({color:0x3fbf9a,transparent:true,opacity:.3,shininess:50,
-      side:THREE.DoubleSide}));
-  cell.add(er);
-  const erLine=new THREE.Mesh(new THREE.TubeGeometry(erCurve,160,.5,6,false),
-    new THREE.MeshBasicMaterial({color:0x3fbf9a,wireframe:true,transparent:true,opacity:.14}));
-  cell.add(erLine);
+  const er=new THREE.Mesh(new THREE.TubeGeometry(erCurve,170,.48,12,false),
+    new THREE.MeshPhongMaterial({color:0x3fbf9a,transparent:true,opacity:.26,shininess:60,
+      side:THREE.DoubleSide}));cell.add(er);
+  const erRim=new THREE.Mesh(new THREE.TubeGeometry(erCurve,170,.56,10,false),
+    rimMaterial(0x58e0ba,2.0,0.4));cell.add(erRim);
+  /* a couple of flattened ER sheets, which is what most of the ER actually is */
+  for(let i=0;i<2;i++){
+    const sheet=new THREE.Mesh(new THREE.TorusGeometry(2.4+i*.5,.9,4,26),
+      new THREE.MeshPhongMaterial({color:0x3fbf9a,transparent:true,opacity:.1,
+        shininess:40,side:THREE.DoubleSide,depthWrite:false}));
+    sheet.scale.set(1,1,.18);
+    sheet.position.set(1.2+i*.6,-.4-i*.5,1.6);sheet.rotation.set(1.2,.5+i*.4,.3);
+    cell.add(sheet);
+  }
+  addPick("er",2.0,[5.5,-.7,1.2]);
 
-  /* ribosomes studding the ER, as one instanced mesh */
-  const RIBO=74;
+  /* ribosomes studding the ER */
+  const RIBO=86;
   const ribo=new THREE.InstancedMesh(new THREE.SphereGeometry(.17,8,6),
-    new THREE.MeshPhongMaterial({color:0x8fd8ff,emissive:0x16414f,shininess:80}),RIBO);
-  const m4=new THREE.Matrix4();
+    new THREE.MeshPhongMaterial({color:0x9ad8ff,emissive:0x16414f,shininess:90}),RIBO);
   for(let i=0;i<RIBO;i++){
-    const u=(i+.5)/RIBO,base=erCurve.getPointAt(u*.98);
-    const tan=erCurve.getTangentAt(u*.98);
+    const u=(i+.5)/RIBO,base=erCurve.getPointAt(u*.98),tan=erCurve.getTangentAt(u*.98);
     const nrm=new THREE.Vector3(0,1,0).cross(tan).normalize();
     const bin=new THREE.Vector3().crossVectors(tan,nrm).normalize();
     const a=i*2.399;
-    const off=nrm.clone().multiplyScalar(Math.cos(a)*.52).add(bin.clone().multiplyScalar(Math.sin(a)*.52));
-    m4.makeTranslation(base.x+off.x,base.y+off.y,base.z+off.z);
-    ribo.setMatrixAt(i,m4);
+    const off=nrm.clone().multiplyScalar(Math.cos(a)*.54).add(bin.clone().multiplyScalar(Math.sin(a)*.54));
+    mm.makeTranslation(base.x+off.x,base.y+off.y,base.z+off.z);
+    ribo.setMatrixAt(i,mm);
   }
-  ribo.instanceMatrix.needsUpdate=true;
-  cell.add(ribo);
+  ribo.instanceMatrix.needsUpdate=true;cell.add(ribo);
 
-  /* Golgi: a stack of flattened discs, shrinking outward */
+  /* --- vacuole: the biggest thing in a budding yeast cell --- */
+  const vacMat=new THREE.MeshPhongMaterial({color:0x5c8fa8,transparent:true,opacity:.1,
+    shininess:70,side:THREE.DoubleSide,depthWrite:false});
+  const vac=new THREE.Mesh(new THREE.SphereGeometry(4.3,40,28),vacMat);
+  vac.position.set(-3.6,1.2,1.0);cell.add(vac);
+  const vacRim=new THREE.Mesh(new THREE.SphereGeometry(4.34,40,28),rimMaterial(0x8fcfe8,2.4,0.42));
+  vacRim.position.copy(vac.position);cell.add(vacRim);
+  clipped.push(vacMat);
+  addPick("vac",4.3,[-3.6,1.2,1.0]);
+
+  /* --- mitochondria: a tubular network --- */
+  const mitG=new THREE.Group();cell.add(mitG);
+  const mitSpecs=[[[-2.2,-4.6,-2.2],[.5,.3,-.9],3.6],[[-5.2,-2.4,-3.4],[-.2,.9,.3],2.8],
+                  [[.6,-5.6,-3.2],[.95,.1,.3],3.2],[[-6.4,1.8,-4.0],[.3,.8,-.5],2.4]];
+  for(const [p,d,len] of mitSpecs){
+    const dir=new THREE.Vector3(...d).normalize();
+    const body=new THREE.Mesh(new THREE.CapsuleGeometry(.56,len,6,12),
+      new THREE.MeshPhongMaterial({color:0xd98f6a,transparent:true,opacity:.42,shininess:60}));
+    body.position.set(...p);body.quaternion.setFromUnitVectors(up,dir);
+    mitG.add(body);
+    const cr=new THREE.Mesh(new THREE.CapsuleGeometry(.6,len+.1,5,10),
+      rimMaterial(0xf0b089,2.2,0.42));
+    cr.position.copy(body.position);cr.quaternion.copy(body.quaternion);mitG.add(cr);
+  }
+  addPick("mit",2.2,[-2.2,-4.6,-2.2]);
+
+  /* --- Golgi: scattered cisternae, which is how budding yeast actually keeps it --- */
   const gol=new THREE.Group();gol.position.set(4.2,3.4,-2.9);gol.rotation.set(.35,.5,-.25);cell.add(gol);
   for(let i=0;i<5;i++){
     const rr=2.05-i*.3;
-    const disc=new THREE.Mesh(new THREE.TorusGeometry(rr,.17,8,34),
-      new THREE.MeshPhongMaterial({color:0xe3a54f,transparent:true,opacity:.42,shininess:60}));
-    disc.position.y=i*.46-.9;disc.rotation.x=Math.PI/2;
+    const disc=new THREE.Mesh(new THREE.TorusGeometry(rr,.17,8,36),
+      new THREE.MeshPhongMaterial({color:0xe3a54f,transparent:true,opacity:.4,shininess:70}));
+    disc.position.set((i%2?.18:-.14),i*.46-.9,(i%2?-.12:.16));
+    disc.rotation.x=Math.PI/2+(i%2?.09:-.07);
     gol.add(disc);
+    const dr=new THREE.Mesh(new THREE.TorusGeometry(rr+.03,.2,6,26),rimMaterial(0xf5c884,2.1,0.4));
+    dr.position.copy(disc.position);dr.rotation.copy(disc.rotation);gol.add(dr);
   }
-  const golGlow=spr(0xe3a54f,3.2);gol.add(golGlow);
+  const golGlow=spr(0xe3a54f,3.2,null,.55);gol.add(golGlow);
+  addPick("gol",2.3,[4.2,3.4,-2.9]);
 
-  /* vesicle */
-  const ves=new THREE.Mesh(new THREE.SphereGeometry(.95,20,14),
-    new THREE.MeshPhongMaterial({color:0x9fb3c0,transparent:true,opacity:.2,
-      shininess:40,depthWrite:false}));
+  /* --- trafficking vesicles: a continuous stream, not one courier --- */
+  const vesPath=new THREE.CatmullRomCurve3([
+    new THREE.Vector3(5.2,-.6,1.0),new THREE.Vector3(5.0,1.4,-.6),
+    new THREE.Vector3(4.3,3.2,-2.4),new THREE.Vector3(5.6,1.2,-3.2),
+    new THREE.Vector3(6.7,-2.3,-3.0),new THREE.Vector3(8.6,-3.2,-3.6)],false);
+  const traffic=[];
+  for(let i=0;i<7;i++){
+    const g=new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(.3,14,10),
+      new THREE.MeshPhongMaterial({color:0xaec6d2,transparent:true,opacity:.34,shininess:70})));
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(.32,16,12),rimMaterial(0xcfe6f0,2.2,0.5)));
+    cell.add(g);traffic.push({g,u:i/7});
+  }
+  /* the big secretory vesicle at the membrane */
+  const ves=new THREE.Mesh(new THREE.SphereGeometry(.95,24,16),
+    new THREE.MeshPhongMaterial({color:0xaec6d2,transparent:true,opacity:.16,
+      shininess:50,depthWrite:false}));
   ves.position.set(6.7,-2.3,-3.0);cell.add(ves);
-  const vesWire=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(.97,10,7)),
-    new THREE.LineBasicMaterial({color:0x46606f,transparent:true,opacity:.4}));
-  vesWire.position.copy(ves.position);cell.add(vesWire);
+  const vesRim=new THREE.Mesh(new THREE.SphereGeometry(.98,24,16),rimMaterial(0xcfe6f0,2.3,0.5));
+  vesRim.position.copy(ves.position);cell.add(vesRim);
+  addPick("ves",1.1,[6.7,-2.3,-3.0]);
 
-  /* the product, with modification slots that fill as it travels */
+  /* --- cytosolic granules, drifting. This is what makes it read as alive. --- */
+  const GR=90;
+  const gran=new THREE.InstancedMesh(new THREE.SphereGeometry(.1,6,5),
+    new THREE.MeshPhongMaterial({color:0x8fb6ca,transparent:true,opacity:.5,shininess:60}),GR);
+  const granHome=[],granPhase=[];
+  for(let i=0;i<GR;i++){
+    let v;do{v=new THREE.Vector3((Math.random()*2-1),(Math.random()*2-1),(Math.random()*2-1))}
+    while(v.length()>1||v.length()<.25);
+    granHome.push(v.multiplyScalar(R*.88));
+    granPhase.push(Math.random()*Math.PI*2);
+  }
+  cell.add(gran);
+  addPick("cyt",R*.62,[2.6,0,-0.6]);
+
+  /* --- mRNA strand from a nuclear pore to the ER, with a ribosome running it --- */
+  const mrnaCurve=new THREE.CatmullRomCurve3([
+    new THREE.Vector3(2.2,1.2,1.2),new THREE.Vector3(3.3,.9,2.1),
+    new THREE.Vector3(4.3,.5,2.6),new THREE.Vector3(5.1,-.2,2.0)]);
+  const mrna=new THREE.Mesh(new THREE.TubeGeometry(mrnaCurve,40,.055,6,false),
+    new THREE.MeshPhongMaterial({color:0x9ad8ff,emissive:0x1b5265,shininess:80}));
+  mrna.visible=false;cell.add(mrna);
+  const transRibo=new THREE.Group();
+  transRibo.add(new THREE.Mesh(new THREE.SphereGeometry(.24,12,9),
+    new THREE.MeshPhongMaterial({color:0xcfe9ff,emissive:0x1d5a6e,shininess:90})));
+  transRibo.add(spr(0x9ad8ff,1.1,null,.8));
+  transRibo.visible=false;cell.add(transRibo);
+
+  /* --- the product --- */
   const cargo=new THREE.Group();scene.add(cargo);
   const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.46,1),
-    new THREE.MeshPhongMaterial({color:0x6fd8e8,emissive:0x1b6f80,shininess:95}));
+    new THREE.MeshPhongMaterial({color:0x6fd8e8,emissive:0x1f7a8c,shininess:100}));
   cargo.add(core);
-  cargo.add(spr(0x6fd8e8,2.6));
+  cargo.add(new THREE.Mesh(new THREE.SphereGeometry(.56,20,14),rimMaterial(0x9ff0ff,2.0,0.75)));
+  cargo.add(spr(0x6fd8e8,2.8));
   const staples=new THREE.Group();cargo.add(staples);
   const glycans=new THREE.Group();cargo.add(glycans);
 
-  /* module beacons, one per compartment that can carry an engineered module */
-  const beaconAt={nuc:[0,-4.4,0],gol:[4.2,6.0,-2.9],ves:[7.0,-4.0,-3.0],er:[6.2,-3.0,1.4],cyt:[-5.0,-5.0,2.6]};
+  /* exported molecules accumulating in the medium */
+  const exported=[];
+  for(let i=0;i<34;i++){
+    const s=spr(0x6fd8e8,.95,null,0);s.visible=false;scene.add(s);
+    exported.push({s,t:1});
+  }
+
+  /* module beacons */
+  const beaconAt={nuc:[0,-4.6,0],gol:[4.2,6.2,-2.9],ves:[7.2,-4.2,-3.0],
+                  er:[6.4,-3.2,1.4],cyt:[-5.0,-5.4,2.6]};
   const beacons={};
   for(const k in beaconAt){
     const g=new THREE.Group();g.position.set(...beaconAt[k]);g.visible=false;cell.add(g);
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(.8,.055,6,28),
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.82,.055,6,30),
       new THREE.MeshBasicMaterial({color:0xe3a54f,transparent:true,opacity:.85}));
     ring.rotation.x=Math.PI/2;g.add(ring);
-    g.add(spr(0xe3a54f,2.2));
+    g.add(spr(0xe3a54f,2.3));
     beacons[k]={g,ring};
   }
 
-  /* buds: division made visible. Rate comes from the growth law. */
+  /* selection halo for whatever compartment is being inspected */
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(1,28,20),rimMaterial(0x6fd8e8,1.5,0.9));
+  halo.visible=false;cell.add(halo);
+
+  /* buds: division made visible, driven by the growth law */
   const buds=[];
   for(let i=0;i<3;i++){
-    const b=new THREE.Mesh(new THREE.SphereGeometry(1,18,13),
-      new THREE.MeshPhongMaterial({color:0x7fa8bd,transparent:true,opacity:.09,
-        shininess:50,depthWrite:false}));
-    const bw=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.004,1)),
-      new THREE.LineBasicMaterial({color:0x2b4e60,transparent:true,opacity:.42}));
-    const g=new THREE.Group();g.add(b);g.add(bw);g.visible=false;scene.add(g);
-    buds.push({g,phase:i/3,dir:new THREE.Vector3(
-      Math.cos(i*2.1)*.8,Math.sin(i*1.3)*.55,Math.sin(i*2.7)*.8).normalize()});
+    const g=new THREE.Group();
+    const b=new THREE.Mesh(new THREE.IcosahedronGeometry(1,3),
+      new THREE.MeshPhongMaterial({color:0x8fb6ca,transparent:true,opacity:.07,
+        shininess:60,depthWrite:false}));
+    const br=new THREE.Mesh(new THREE.SphereGeometry(1.01,24,16),rimMaterial(0x7fd4ea,2.6,0.45));
+    g.add(b);g.add(br);g.visible=false;scene.add(g);
+    buds.push({g,body:b,rim:br,phase:i/3,last:0,
+      dir:new THREE.Vector3(Math.cos(i*2.1)*.8,Math.sin(i*1.3)*.55,Math.sin(i*2.7)*.8).normalize()});
   }
 
-  /* hand-rolled orbit: no extra dependency, and it behaves the same on touch */
+  /* ------------------------------------------------------- camera and picking */
   const ctr=new THREE.Vector3(2.6,0,-0.6);
-  let yaw=-0.62, pitch=0.28, dist=30, drag=null;
+  const cams={yaw:-0.62,pitch:0.22,dist:31};
+  const want={yaw:-0.62,pitch:0.22,dist:31,ctr:ctr.clone(),active:false};
+  let drag=null,moved=0;
   const place=()=>{
-    const cp=Math.cos(pitch);
-    cam.position.set(ctr.x+dist*cp*Math.sin(yaw), ctr.y+dist*Math.sin(pitch), ctr.z+dist*cp*Math.cos(yaw));
+    const cp=Math.cos(cams.pitch);
+    cam.position.set(ctr.x+cams.dist*cp*Math.sin(cams.yaw),
+                     ctr.y+cams.dist*Math.sin(cams.pitch),
+                     ctr.z+cams.dist*cp*Math.cos(cams.yaw));
     cam.lookAt(ctr);
   };
-  const stage=el("stage");
-  stage.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};stage.setPointerCapture(e.pointerId)});
-  stage.addEventListener("pointermove",e=>{
-    if(!drag)return;
-    yaw-=(e.clientX-drag.x)*0.0062;
-    pitch=Math.max(-1.25,Math.min(1.25,pitch+(e.clientY-drag.y)*0.0052));
-    drag={x:e.clientX,y:e.clientY};place();
+  const view=el("view");
+  const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+  const pickAt=(cx,cy)=>{
+    const r=cv.getBoundingClientRect();
+    ndc.set(((cx-r.left)/r.width)*2-1, -((cy-r.top)/r.height)*2+1);
+    ray.setFromCamera(ndc,cam);
+    const hits=ray.intersectObjects(picks,false);
+    if(!hits.length)return null;
+    const inner=hits.find(h=>!h.object.userData.outer);
+    return (inner||hits[0]).object.userData.key;
+  };
+  cv.addEventListener("pointerdown",e=>{
+    drag={x:e.clientX,y:e.clientY};moved=0;cv.classList.add("grabbing");
+    try{cv.setPointerCapture(e.pointerId)}catch(_){}
   });
-  const stop=e=>{if(drag){try{stage.releasePointerCapture(e.pointerId)}catch(_){}drag=null}};
-  stage.addEventListener("pointerup",stop);stage.addEventListener("pointercancel",stop);
-  stage.addEventListener("wheel",e=>{
-    e.preventDefault();dist=Math.max(14,Math.min(64,dist+e.deltaY*0.022));place();
+  cv.addEventListener("pointermove",e=>{
+    if(!drag){
+      const k=pickAt(e.clientX,e.clientY);
+      cv.classList.toggle("pickable",!!k);
+      return;
+    }
+    moved+=Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y);
+    cams.yaw-=(e.clientX-drag.x)*0.0062;
+    cams.pitch=Math.max(-1.3,Math.min(1.3,cams.pitch+(e.clientY-drag.y)*0.0052));
+    drag={x:e.clientX,y:e.clientY};want.active=false;place();
+  });
+  const release=e=>{
+    if(!drag)return;
+    try{cv.releasePointerCapture(e.pointerId)}catch(_){}
+    cv.classList.remove("grabbing");
+    if(moved<5){const k=pickAt(e.clientX,e.clientY);if(k)inspect(k,true)}
+    drag=null;
+  };
+  cv.addEventListener("pointerup",release);
+  cv.addEventListener("pointercancel",e=>{drag=null;cv.classList.remove("grabbing")});
+  cv.addEventListener("wheel",e=>{
+    e.preventDefault();
+    cams.dist=Math.max(13,Math.min(70,cams.dist+e.deltaY*0.022));
+    want.active=false;place();
   },{passive:false});
 
   const resize=()=>{
-    const w=el("cv").clientWidth||600,h=el("cv").clientHeight||480;
+    const w=cv.clientWidth||600,h=cv.clientHeight||480;
     renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();place();
   };
   window.addEventListener("resize",resize);
@@ -636,17 +894,22 @@ function buildScene(){
   const labelEls={};
   for(const L of LABELS){
     const d=document.createElement("div");d.className="lbl";d.textContent=L.txt;
-    stage.appendChild(d);labelEls[L.k]=d;
+    view.appendChild(d);labelEls[L.k]=d;
   }
 
-  three={renderer,scene,cam,cell,nuc,helix,gol,golGlow,ves,vesWire,cargo,core,staples,glycans,
-    beacons,buds,labelEls,resize,place,ribo,er,
-    get yaw(){return yaw},set yaw(v){yaw=v}};
+  three={renderer,scene,cam,cell,nuc,helix,gol,golGlow,ves,vesRim,cargo,core,staples,glycans,
+    beacons,buds,labelEls,resize,place,ribo,gran,granHome,granPhase,mp,scars,vac,vacRim,
+    mitG,traffic,vesPath,mrna,transRibo,mrnaCurve,exported,halo,picks,
+    plane,clipped,cams,want,ctr,wallRim,
+    /* the fresnel shells are additive and are not clipped, so a cross-section
+       hides them rather than letting the glassy edge draw across the cut */
+    rimShells:[wallRim,vacRim],
+    organelles:[vac,vacRim,mitG,scars,mp]};
   resize();
   return three;
 }
 
-/* modification geometry rebuilt whenever the target changes */
+/* modification geometry, rebuilt whenever the target changes */
 function dressCargo(f,r){
   if(!three)return;
   const {staples,glycans}=three;
@@ -658,10 +921,9 @@ function dressCargo(f,r){
   for(let i=0;i<nS;i++){
     const a=i/Math.max(nS,1)*Math.PI*2;
     const bar=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.62,5),
-      new THREE.MeshPhongMaterial({color:0xf2d98a,emissive:0x5d4b14,shininess:90}));
+      new THREE.MeshPhongMaterial({color:0xf6e09a,emissive:0x6b5618,shininess:95}));
     bar.position.set(Math.cos(a)*.52,Math.sin(a*1.7)*.26,Math.sin(a)*.52);
-    bar.rotation.set(Math.PI/2.4,a,0);
-    bar.visible=false;staples.add(bar);
+    bar.rotation.set(Math.PI/2.4,a,0);bar.visible=false;staples.add(bar);
   }
 
   const nG=Math.min(f.sequons,5);
@@ -671,39 +933,49 @@ function dressCargo(f,r){
     const a=i/Math.max(nG,1)*Math.PI*2+0.7;
     const t=new THREE.Group();
     const stem=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,.46,5),
-      new THREE.MeshPhongMaterial({color:col,emissive:0x1d2a1f,shininess:70}));
+      new THREE.MeshPhongMaterial({color:col,emissive:0x1d2a1f,shininess:75}));
     stem.position.y=.23;t.add(stem);
     for(let b=0;b<3;b++){
-      const br=new THREE.Mesh(new THREE.SphereGeometry(.1,7,5),
-        new THREE.MeshPhongMaterial({color:col,emissive:0x22301f,shininess:80}));
       const ba=b/3*Math.PI*2;
+      const br=new THREE.Mesh(new THREE.SphereGeometry(.1,7,5),
+        new THREE.MeshPhongMaterial({color:col,emissive:0x22301f,shininess:85}));
       br.position.set(Math.cos(ba)*.19,.52,Math.sin(ba)*.19);t.add(br);
       if(humanised){
         const tip=new THREE.Mesh(new THREE.SphereGeometry(.07,6,5),
-          new THREE.MeshPhongMaterial({color:0xf0c988,emissive:0x4a3610,shininess:90}));
+          new THREE.MeshPhongMaterial({color:0xf6d8a4,emissive:0x5a4312,shininess:95}));
         tip.position.set(Math.cos(ba)*.3,.72,Math.sin(ba)*.3);t.add(tip);
       }
     }
     t.position.set(Math.cos(a)*.42,.2,Math.sin(a)*.42);
-    t.lookAt(t.position.clone().multiplyScalar(2.4));
-    t.rotateX(Math.PI/2);
+    t.lookAt(t.position.clone().multiplyScalar(2.4));t.rotateX(Math.PI/2);
     t.visible=false;glycans.add(t);
   }
 }
 
 /* ------------------------------------------------------------------- transit */
 let state={seq:null,name:"",idx:undefined,f:null,r:null,cls:"therapeutic",sec:true};
-let tr={i:0,u:0,cycles:0,divisions:0,budT:0};
+let tr={i:0,u:0,cycles:0,divisions:0,budT:0,exports:0};
 
 function say(html){
   const lg=el("log");
   const d=document.createElement("div");d.innerHTML=html;lg.appendChild(d);
-  while(lg.children.length>26)lg.removeChild(lg.firstChild);
+  while(lg.children.length>30)lg.removeChild(lg.firstChild);
   lg.scrollTop=lg.scrollHeight;
 }
 
-function stageEnter(i){
+function applyStageState(i){
+  if(!three)return;
+  const f=state.f;if(!f)return;
+  three.staples.children.forEach(c=>c.visible=i>=3);
+  three.glycans.children.forEach(c=>c.visible=i>=3);
+  three.mrna.visible=i===2;
+  three.transRibo.visible=i===2;
+}
+
+function stageEnter(i,quiet){
   const f=state.f,r=state.r;if(!f)return;
+  applyStageState(i);
+  if(quiet)return;
   const staples=three?three.staples:{children:[]};
   const glycans=three?three.glycans:{children:[]};
   if(i===0){
@@ -712,11 +984,10 @@ function stageEnter(i){
     glycans.children.forEach(c=>c.visible=false);
     if(r.A4.state==="eng")say("<i>nucleus</i> "+f.len+" aa needs MOD-largecds");
   }
-  if(i===1)say("<b>nucleus</b> message exported through the pore");
+  if(i===1)say("<b>nucleus</b> message exported through a nuclear pore");
   if(i===2){
     say("<b>cytosol</b> ribosome engaged, "+f.len+" codons to read");
-    if(f.cr)say("<b>cytosol</b> codon adaptiveness "+f.cr.best.toFixed(3)+
-      " best reachable &middot; no rate implied");
+    if(f.cr)say("<b>cytosol</b> codon adaptiveness "+f.cr.best.toFixed(3)+" best reachable &middot; no rate implied");
     if(f.sig)say("<b>cytosol</b> signal peptide recognised, routed to the ER <span style='color:var(--unknown)'>[heuristic]</span>");
     else say("<b>cytosol</b> no signal peptide found <span style='color:var(--unknown)'>[heuristic]</span>");
   }
@@ -744,6 +1015,44 @@ function stageEnter(i){
     else say("<b>vesicle</b> product retained &mdash; recovery needs cell lysis");
   }
   if(i===7)say("<u>medium</u> product secreted &middot; <b>titre not predicted, no model wired in</b>");
+}
+
+/* ------------------------------------------------------------------ inspector */
+function inspect(k,fly){
+  if(!COMPS[k])return;
+  picked=k;
+  const c=COMPS[k];
+  el("inspTitle").textContent=c.name;
+  el("inspNote").textContent=c.desc;
+  const here=CAPS.filter(x=>x.loc===k);
+  const mods=Object.keys(MODS).filter(m=>MODS[m].loc===k&&state.r&&
+    Object.values(state.r).some(s=>s.mod===m&&s.state==="eng"));
+  let html="";
+  for(const cap of here){
+    const s=state.r?state.r[cap.id]:{state:"off",why:""};
+    const cls=s.state==="native"?"nat":s.state==="eng"?"eng":s.state==="unknown"?"unk":"off";
+    html+='<div class="irow '+cls+'"><div class="ic">'+cap.id+'</div><div class="it">'+
+      cap.name+(s.why?' <span style="color:var(--ink-3)">— '+s.why+'</span>':'')+'</div></div>';
+  }
+  if(!here.length)html+='<div class="irow off"><div class="ic">—</div><div class="it">No capability is located here in the chassis object.</div></div>';
+  for(const m of mods)
+    html+='<div class="irow eng"><div class="ic">MOD</div><div class="it">'+MODS[m].name+
+      ' <span style="color:var(--ink-3)">— engineered in, cost not measured</span></div></div>';
+  el("inspList").innerHTML=html;
+
+  if(three){
+    const t=c.cam;
+    if(fly){
+      three.want.yaw=t.yaw;three.want.pitch=t.pitch;three.want.dist=t.dist;
+      three.want.ctr.set(...t.ctr);three.want.active=true;
+    }
+    const pm=three.picks.find(p=>p.userData.key===k&&!p.userData.outer);
+    if(pm){
+      three.halo.visible=true;
+      three.halo.position.copy(pm.position);
+      three.halo.scale.setScalar(pm.geometry.parameters.radius*1.06);
+    } else three.halo.visible=false;
+  }
 }
 
 /* ----------------------------------------------------------------- rendering UI */
@@ -783,15 +1092,18 @@ function renderCaps(r){
   const g=el("caps");g.innerHTML="";
   let nat=0,eng=0,unk=0;
   for(const c of CAPS){
-    const s=r[c.id],d=document.createElement("div");
+    const s=r[c.id],d=document.createElement("button");
+    d.type="button";
     let cls="cap";
     if(s.state==="native"){cls+=" nat";nat++}
     else if(s.state==="eng"){cls+=" eng";eng++}
     else if(s.state==="unknown"){cls+=" unk";unk++}
     else cls+=" off";
     d.className=cls;
+    d.title="Show "+(COMPS[c.loc]?COMPS[c.loc].name:c.loc)+" in the cell";
     d.innerHTML='<div class="cid">'+c.id+'</div><div class="cname">'+c.name+
       '</div><div class="why">'+s.why+'</div>';
+    d.onclick=()=>inspect(c.loc,true);
     g.appendChild(d);
   }
   el("capCount").textContent=nat+" native · "+eng+" need engineering · "+unk+
@@ -825,10 +1137,11 @@ function renderStatus(){
   el("status").innerHTML=[
     ["specimen",state.name||"—"],
     ["transit cycles",String(tr.cycles)],
+    ["exported",String(tr.exports)],
     ["divisions",String(tr.divisions)],
     ["modules engineered",String(mods)],
-    ["growth rate",(g*100).toFixed(0)+"% of unburdened"],
-    ["productivity",(p||0).toFixed(0)+"% of best reachable"]
+    ["growth rate",(g*100).toFixed(0)+"%"],
+    ["productivity",(p||0).toFixed(0)+"% of best"]
   ].map(([k,v])=>'<div class="stat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>').join("");
 }
 
@@ -838,7 +1151,7 @@ function renderGrowth(){
   const mods=state.r?[...new Set(Object.values(state.r).filter(s=>s.state==="eng"&&s.mod)
     .map(s=>s.mod))].length:0;
   let verdict;
-  if(t>=PHI_MAX)verdict="growth has stopped, yield is zero";
+  if(t>=PHI_MAX)verdict="growth stopped, yield zero";
   else if(t>OPT*1.25)verdict="past the optimum";
   else if(t<OPT*0.6)verdict="headroom unused";
   else verdict="near the optimum";
@@ -859,36 +1172,26 @@ function drawGrowth(){
   const w=cv.clientWidth||520,h=cv.clientHeight||190;
   cv.width=w*dpr;cv.height=h*dpr;
   const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
-  const L=40,Rr=14,T=16,B=30, pw=w-L-Rr, ph=h-T-B;
+  const L=40,Rr=14,T=16,B=30,pw=w-L-Rr,ph=h-T-B;
   const px=t=>L+t/48*pw, py=v=>T+ph-v*ph;
   const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   x.strokeStyle=css("--line-2");x.lineWidth=1;
   x.beginPath();x.moveTo(L,T);x.lineTo(L,T+ph);x.lineTo(L+pw,T+ph);x.stroke();
-
-  x.strokeStyle=css("--ink-3");x.setLineDash([3,4]);x.lineWidth=1;
+  x.strokeStyle=css("--ink-3");x.setLineDash([3,4]);
   for(const t of [OPT,PHI_MAX]){x.beginPath();x.moveTo(px(t),T);x.lineTo(px(t),T+ph);x.stroke()}
   x.setLineDash([]);
-
-  x.strokeStyle=css("--ink-3");x.lineWidth=1.4;x.globalAlpha=.7;
-  x.beginPath();
+  x.strokeStyle=css("--ink-3");x.lineWidth=1.4;x.globalAlpha=.7;x.beginPath();
   for(let t=0;t<=48;t++){const v=growthOf(t);t?x.lineTo(px(t),py(v)):x.moveTo(px(t),py(v))}
   x.stroke();x.globalAlpha=1;
-
-  x.strokeStyle=css("--native");x.lineWidth=2.4;
-  x.beginPath();
+  x.strokeStyle=css("--native");x.lineWidth=2.4;x.beginPath();
   for(let t=0;t<=48;t++){const v=prodOf(t)/PROD_BEST;t?x.lineTo(px(t),py(v)):x.moveTo(px(t),py(v))}
   x.stroke();
-
   const cur=+el("load").value;
-  x.fillStyle=css("--eng");
-  x.beginPath();x.arc(px(cur),py(prodOf(cur)/PROD_BEST),4.5,0,7);x.fill();
-
-  x.fillStyle=css("--ink-3");x.font='10px "IBM Plex Mono",monospace';
-  x.textAlign="center";
+  x.fillStyle=css("--eng");x.beginPath();x.arc(px(cur),py(prodOf(cur)/PROD_BEST),4.5,0,7);x.fill();
+  x.fillStyle=css("--ink-3");x.font='10px "IBM Plex Mono",monospace';x.textAlign="center";
   x.fillText("0%",L,h-12);x.fillText("20%",px(OPT),h-12);x.fillText("40%",px(PHI_MAX),h-12);
-  x.textAlign="right";
-  x.fillText("none",L-6,py(0)+3);x.fillText("most",L-6,py(1)+3);
+  x.textAlign="right";x.fillText("none",L-6,py(0)+3);x.fillText("most",L-6,py(1)+3);
   x.textAlign="left";
   x.fillStyle=css("--native");x.fillText("harvested product",L+8,T+11);
   x.fillStyle=css("--ink-3");x.fillText("growth rate",L+8,T+24);
@@ -904,9 +1207,10 @@ function load(seq,name,idx){
   markChip(idx===undefined?-1:idx);
   renderFeat(f);renderCaps(state.r);renderMods(state.r);
   dressCargo(f,state.r);
-  tr={i:0,u:0,cycles:0,divisions:0,budT:0};
+  tr={i:0,u:0,cycles:0,divisions:0,budT:0,exports:0};
   el("log").innerHTML="";
   stageEnter(0);
+  inspect(picked,false);
   renderStatus();renderGrowth();
 }
 const rerun=()=>{if(state.seq)load(state.seq,state.name,state.idx)};
@@ -915,73 +1219,160 @@ const rerun=()=>{if(state.seq)load(state.seq,state.name,state.idx)};
 const easeIO=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
 let last=performance.now();
 
+function stepsNow(){return state.sec?STOPS.length:7}
+
+function cargoPos(i,u){
+  const steps=stepsNow();
+  const a=STOPS[i].p,b=STOPS[(i+1)%STOPS.length].p;
+  const hold=(i===steps-1&&!state.sec);
+  const e=easeIO(u);
+  return [hold?a[0]:a[0]+(b[0]-a[0])*e,
+          hold?a[1]:a[1]+(b[1]-a[1])*e,
+          hold?a[2]:a[2]+(b[2]-a[2])*e];
+}
+
+function setScrubUI(){
+  const steps=stepsNow();
+  const frac=(tr.i+tr.u)/steps;
+  el("scrub").value=String(Math.round(frac*1000));
+  el("scrubPct").textContent=Math.round(frac*100)+"%";
+  el("scrubName").textContent=COMPS[STOPS[tr.i].k]?COMPS[STOPS[tr.i].k].name.toLowerCase():"transit";
+}
+
 function tick(now){
   requestAnimationFrame(tick);
   const dt=Math.min((now-last)/1000,0.1);last=now;
-  if(!three||paused||document.hidden)return;
-
+  if(!three||document.hidden)return;
+  const run=!paused&&!scrubbing;
   const t=+el("load").value, g=growthOf(t);
-  const steps=state.sec?STOPS.length:7;
+  const steps=stepsNow();
 
-  /* cargo along the route */
-  tr.u+=dt/(STOPS[tr.i].t*(reduce?1.8:1));
-  if(tr.u>=1){
-    tr.u=0;tr.i++;
-    if(tr.i>=steps){tr.i=0;tr.cycles++;renderStatus()}
-    stageEnter(tr.i);
+  if(run){
+    tr.u+=dt*speed/(STOPS[tr.i].t*(reduce?1.7:1));
+    if(tr.u>=1){
+      tr.u=0;
+      const wasLast=tr.i===steps-1;
+      tr.i++;
+      if(tr.i>=steps){
+        tr.i=0;tr.cycles++;
+        if(state.sec&&wasLast){
+          tr.exports++;
+          const slot=three.exported.find(x=>x.t>=1);
+          if(slot){slot.t=0;slot.s.visible=true;
+            slot.s.position.set(13.5,-4.0,-4.2);
+            slot.v=new THREE.Vector3(1.1+Math.random()*.8,(Math.random()-.4)*.7,
+              (Math.random()-.5)*.7);}
+        }
+        renderStatus();
+      }
+      stageEnter(tr.i);
+    }
+    setScrubUI();
   }
-  const a=STOPS[tr.i].p, b=STOPS[(tr.i+1)%STOPS.length].p;
-  const e=easeIO(tr.u);
-  const hold=(tr.i===steps-1&&!state.sec);
-  three.cargo.position.set(
-    hold?a[0]:a[0]+(b[0]-a[0])*e,
-    hold?a[1]:a[1]+(b[1]-a[1])*e,
-    hold?a[2]:a[2]+(b[2]-a[2])*e);
-  if(!reduce){
+
+  const cp=cargoPos(tr.i,tr.u);
+  three.cargo.position.set(cp[0],cp[1],cp[2]);
+
+  if(!reduce&&run){
     three.cargo.rotation.y+=dt*1.1;three.cargo.rotation.x+=dt*.5;
     three.helix.rotation.y+=dt*.22;
-    three.cell.rotation.y+=dt*.035;
+    if(spin)three.cell.rotation.y+=dt*.03;
     for(const k in three.beacons){
-      const bc=three.beacons[k];
-      bc.ring.rotation.z+=dt*1.6;
+      const bc=three.beacons[k];bc.ring.rotation.z+=dt*1.6;
       bc.ring.scale.setScalar(1+Math.sin(now/420)*.09);
     }
-    three.golGlow.material.opacity=.5+Math.sin(now/700)*.18;
+    three.golGlow.material.opacity=.42+Math.sin(now/700)*.16;
+    if(three.halo.visible)three.halo.material.uniforms.uStr.value=.7+Math.sin(now/380)*.28;
   }
 
-  /* compartment labels follow the geometry, and light up when the cargo is there */
+  /* brownian drift of cytosolic granules */
+  if(run&&!reduce){
+    const mm=new THREE.Matrix4();
+    for(let i=0;i<three.granHome.length;i++){
+      const h=three.granHome[i],ph=three.granPhase[i]+now/1400;
+      mm.makeTranslation(h.x+Math.sin(ph*1.7)*.42, h.y+Math.cos(ph*1.3)*.42,
+                         h.z+Math.sin(ph*2.1)*.42);
+      three.gran.setMatrixAt(i,mm);
+    }
+    three.gran.instanceMatrix.needsUpdate=true;
+  }
+
+  /* trafficking vesicles along the ER to membrane route */
+  if(run){
+    for(const v of three.traffic){
+      v.u=(v.u+dt*0.055*speed)%1;
+      const p=three.vesPath.getPointAt(v.u);
+      v.g.position.copy(p);
+      const s=.75+Math.sin(v.u*Math.PI)*.45;
+      v.g.scale.setScalar(s);
+    }
+  }
+
+  /* the ribosome running the message, only while translation is the active stage */
+  if(three.transRibo.visible){
+    const u=Math.min(.999,tr.u);
+    three.transRibo.position.copy(three.mrnaCurve.getPointAt(u));
+  }
+
+  /* exported molecules drifting away and fading */
+  for(const x of three.exported){
+    if(x.t>=1){x.s.visible=false;continue}
+    if(run)x.t+=dt*0.1;
+    x.s.position.addScaledVector(x.v,dt*(run?1:0));
+    x.s.material.opacity=Math.max(0,1-x.t)*.85;
+    x.s.scale.setScalar(.95+x.t*.7);
+  }
+
+  /* camera fly-to */
+  if(three.want.active){
+    const k=1-Math.pow(0.0025,dt);
+    three.cams.yaw+=(three.want.yaw-three.cams.yaw)*k;
+    three.cams.pitch+=(three.want.pitch-three.cams.pitch)*k;
+    three.cams.dist+=(three.want.dist-three.cams.dist)*k;
+    three.ctr.lerp(three.want.ctr,k);
+    if(Math.abs(three.want.dist-three.cams.dist)<.05&&
+       Math.abs(three.want.yaw-three.cams.yaw)<.01)three.want.active=false;
+    three.place();
+  }
+  if(follow){
+    three.ctr.lerp(new THREE.Vector3(cp[0],cp[1],cp[2]),1-Math.pow(0.02,dt));
+    three.place();
+  }
+
+  /* labels */
   const here=STOPS[tr.i].k;
-  const v=new THREE.Vector3(), cvEl=el("cv");
+  const v3=new THREE.Vector3(),cvEl=el("cv");
   const w=cvEl.clientWidth,h=cvEl.clientHeight;
   for(const L of LABELS){
     const d=three.labelEls[L.k];if(!d)continue;
-    v.set(...L.p).applyMatrix4(three.cell.matrixWorld).project(three.cam);
-    const sx=(v.x*.5+.5)*w, sy=(-v.y*.5+.5)*h;
-    const vis=v.z<1&&sx>-40&&sx<w+40&&sy>-20&&sy<h+20;
+    if(!showLbl){d.style.opacity="0";continue}
+    v3.set(...L.p).applyMatrix4(three.cell.matrixWorld).project(three.cam);
+    const sx=(v3.x*.5+.5)*w, sy=(-v3.y*.5+.5)*h;
+    const vis=v3.z<1&&sx>-40&&sx<w+40&&sy>-20&&sy<h+20;
     d.style.left=sx+"px";d.style.top=sy+"px";
-    d.style.opacity=vis?(L.k===here?"1":".52"):"0";
+    d.style.opacity=vis?(L.k===here?"1":(L.k===picked?".85":".45")):"0";
     const engHere=(L.k==="gol"&&state.r&&state.r.B4.state==="eng")||
                   (L.k==="ves"&&state.r&&state.r.E3.state==="eng");
-    d.className="lbl"+(L.k===here?" on":"")+(engHere?" eng":"");
+    d.className="lbl"+(L.k===here||L.k===picked?" on":"")+(engHere?" eng":"");
   }
 
-  /* division: the growth law, made physical. At the ceiling nothing buds. */
-  if(g>0){
-    tr.budT+=dt*g;
+  /* division, from the growth law */
+  if(g>0&&run){
+    tr.budT+=dt*g*speed;
+    const rotOnly=new THREE.Matrix4().extractRotation(three.cell.matrixWorld);
     for(const bd of three.buds){
-      const u=((tr.budT*0.26)+bd.phase)%1;
+      const u=((tr.budT*0.24)+bd.phase)%1;
       bd.g.visible=true;
-      const s=u<.78?(u/.78)*R*0.62:R*0.62;
-      bd.g.scale.setScalar(Math.max(0.001,s));
-      const push=R*0.9+ (u<.78? u*R*0.2 : (u-.78)/.22*R*1.9);
-      bd.g.position.copy(bd.dir).multiplyScalar(push).applyMatrix4(
-        new THREE.Matrix4().extractRotation(three.cell.matrixWorld));
-      bd.g.children[0].material.opacity=u<.78?.09:.09*(1-(u-.78)/.22);
-      bd.g.children[1].material.opacity=u<.78?.42:.42*(1-(u-.78)/.22);
-      if(u<bd.last)tr.divisions++, renderStatus();
+      bd.g.scale.setScalar(Math.max(0.001,u<.8?(u/.8)*R*0.6:R*0.6));
+      const push=R*0.9+(u<.8? u*R*0.18 : (u-.8)/.2*R*1.9);
+      bd.g.position.copy(bd.dir).multiplyScalar(push).applyMatrix4(rotOnly);
+      const fade=u<.8?1:1-(u-.8)/.2;
+      bd.body.material.opacity=.07*fade;
+      bd.rim.material.uniforms.uStr.value=.45*fade;
+      if(u<bd.last){tr.divisions++;renderStatus()}
       bd.last=u;
     }
-  } else {
+  } else if(g<=0){
     for(const bd of three.buds)bd.g.visible=false;
   }
 
@@ -991,13 +1382,16 @@ function tick(now){
 /* -------------------------------------------------------------------- wire up */
 renderChips();
 if(buildScene()){
+  inspect("nuc",false);
   requestAnimationFrame(tick);
 }else{
   el("fb").style.display="grid";
   el("cv").style.display="none";
+  inspect("nuc",false);
 }
+
 el("run").onclick=()=>{
-  const raw=el("custom").value, lines=raw.split("\n");
+  const raw=el("custom").value,lines=raw.split("\n");
   const body=lines.filter(l=>!l.startsWith(">")).join("");
   const hdr=(lines.find(l=>l.startsWith(">"))||"").replace(/^>/,"").trim();
   if(body.replace(/[^A-Za-z]/g,"").length)load(body,hdr||"Pasted sequence",undefined);
@@ -1006,11 +1400,62 @@ el("run").onclick=()=>{
 el("pclass").onchange=rerun;
 el("secreted").onchange=rerun;
 el("load").oninput=()=>{renderGrowth();renderStatus()};
-el("pause").onclick=()=>{
-  paused=!paused;el("pause").textContent=paused?"Resume":"Pause";
-  if(!paused)last=performance.now();
+
+const press=(id,on)=>el(id).setAttribute("aria-pressed",on?"true":"false");
+el("tPause").onclick=()=>{paused=!paused;el("tPause").textContent=paused?"Play":"Pause";
+  press("tPause",paused);if(!paused)last=performance.now()};
+el("tStep").onclick=()=>{
+  if(!state.f)return;
+  paused=true;el("tPause").textContent="Play";press("tPause",true);
+  tr.u=0;tr.i=(tr.i+1)%stepsNow();
+  if(tr.i===0)tr.cycles++;
+  stageEnter(tr.i);setScrubUI();renderStatus();
 };
+const setSpeed=(v,id)=>{speed=v;for(const i of ["tS05","tS1","tS2"])press(i,i===id)};
+el("tS05").onclick=()=>setSpeed(.5,"tS05");
+el("tS1").onclick=()=>setSpeed(1,"tS1");
+el("tS2").onclick=()=>setSpeed(2,"tS2");
+el("tClip").onclick=()=>{
+  clip=!clip;press("tClip",clip);
+  if(!three)return;
+  for(const m of three.clipped){m.clippingPlanes=clip?[three.plane]:[];m.needsUpdate=true}
+  three.rimShells.forEach(o=>o.visible=!clip);
+};
+el("tFollow").onclick=()=>{follow=!follow;press("tFollow",follow);
+  if(!follow&&three){three.want.ctr.set(2.6,0,-0.6);three.want.yaw=three.cams.yaw;
+    three.want.pitch=three.cams.pitch;three.want.dist=three.cams.dist;three.want.active=true}};
+el("tSpin").onclick=()=>{spin=!spin;press("tSpin",spin)};
+el("tLbl").onclick=()=>{showLbl=!showLbl;press("tLbl",showLbl)};
+el("tOrg").onclick=()=>{showOrg=!showOrg;press("tOrg",showOrg);
+  if(three)three.organelles.forEach(o=>o.visible=showOrg)};
+el("tRibo").onclick=()=>{showRibo=!showRibo;press("tRibo",showRibo);
+  if(three){three.ribo.visible=showRibo;three.gran.visible=showRibo}};
+el("tReset").onclick=()=>{
+  if(!three)return;
+  follow=false;press("tFollow",false);
+  three.want.yaw=-0.62;three.want.pitch=0.22;three.want.dist=31;
+  three.want.ctr.set(2.6,0,-0.6);three.want.active=true;
+};
+
+el("scrub").addEventListener("pointerdown",()=>{scrubbing=true});
+el("scrub").addEventListener("pointerup",()=>{scrubbing=false;last=performance.now()});
+el("scrub").addEventListener("input",e=>{
+  const steps=stepsNow(),frac=(+e.target.value)/1000*steps;
+  tr.i=Math.min(steps-1,Math.floor(frac));tr.u=frac-tr.i;
+  stageEnter(tr.i,true);setScrubUI();
+});
+el("scrub").addEventListener("change",()=>{scrubbing=false;last=performance.now()});
+
+window.addEventListener("keydown",e=>{
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+  if(e.code==="Space"){e.preventDefault();el("tPause").click()}
+  if(e.key==="c"||e.key==="C")el("tClip").click();
+  if(e.key==="f"||e.key==="F")el("tFollow").click();
+  if(e.key==="r"||e.key==="R")el("tReset").click();
+});
 window.addEventListener("resize",drawGrowth);
+
 load(PROTEINS[1].s,PROTEINS[1].n,1);
+setScrubUI();
 if(three)three.renderer.render(three.scene,three.cam);
 </script>
