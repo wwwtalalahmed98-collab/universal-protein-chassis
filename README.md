@@ -35,6 +35,9 @@ python -I scripts/elongation.py
 
 # Validate that layer against published ribosome profiling
 python -I scripts/validate_elongation.py
+
+# Freeze the chassis's predictions for the validation set, before reading any answer
+python -I scripts/freeze_predictions.py
 ```
 
 No dependencies beyond the Python standard library.
@@ -86,6 +89,7 @@ that no larger model removes.
 | `protocol/` | The reasoning, one document per question, each ending in what it does not know |
 | `docs/PROJECT-STORY.md` | Durable record: every checkpoint, decision, and reversal, newest first |
 | `reports/` | Findings from investigations that were closed out |
+| `validation/` | **The retrospective test.** Targets, the frozen scoring mapping, frozen predictions and their hash manifest |
 
 ### The protocol documents, in the order they were written
 

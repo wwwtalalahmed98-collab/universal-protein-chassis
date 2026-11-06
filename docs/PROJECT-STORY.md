@@ -4,6 +4,7 @@ The durable record. Newest checkpoint at the top. Each entry is written to be
 readable without the conversation it came from.
 
 ## Checkpoints
+1. **2026-11-06 - The validation set is frozen, and the freeze found the problem** (below)
 1. **2026-11-05 - The chassis consumes the layer, and a known error is out** (below)
 1. **2026-11-04 - The elongation layer is tested against real cells** (below)
 1. **2026-11-03 - The layers get a method, and the method indicts our own code** (below)
@@ -23,6 +24,177 @@ readable without the conversation it came from.
 3. **2026-10-20 — The target is a universal chassis**
 4. **2026-10-20 — How we got here, and what HostMatch is**
 5. **2026-10-17 — The big database does not have what we needed**
+
+---
+
+# 2026-11-06 — The validation set is frozen, and the freeze found the problem
+
+Records: [`validation/protocol-v1.md`](../validation/protocol-v1.md),
+[`validation/targets-v1.tsv`](../validation/targets-v1.tsv),
+[`validation/mapping-v1.tsv`](../validation/mapping-v1.tsv),
+[`validation/predictions-v1.tsv`](../validation/predictions-v1.tsv),
+[`validation/freeze-v1.json`](../validation/freeze-v1.json),
+[`scripts/freeze_predictions.py`](../scripts/freeze_predictions.py).
+
+## The thing that had been outstanding longest
+
+Three checkpoints in a row ended by naming the same unstarted work: the
+retrospective test of the chassis's **judgement**, as opposed to its
+perception. `reports/02-feature-validation.md` had checked whether the tool
+*reads* a protein correctly — 16 of 16 inside its domain. Nothing had ever
+checked whether its *advice* was any good.
+
+**It is started, and the first result arrived before any answer was read.**
+
+## The set
+
+18 protein-paper rows from **14 papers**, assembled from PubMed. Every
+accession resolved against the UniProt REST API; every PMID and DOI taken from
+the PubMed record rather than from memory.
+
+**11 of the 18 rows belong to a differential or negative result** — the same
+modification helped one protein and not another, or helped nothing at all.
+That weighting was the feasibility report's instruction: successes test recall,
+only differentials test discrimination.
+
+The backbone cases:
+
+- **Bovine prochymosin vs plant thaumatin** — BiP overexpression plus PMR1
+  disruption stimulated the first and not the second.
+- **Human serum albumin vs interleukin-1β** — PDI and polyubiquitin dosage
+  strongly helped the disulfide-rich albumin and not IL-1β.
+- ***P. furiosus* β-glucosidase** — PDI improves secretion of a protein with
+  **no disulfide bonds at all**, and BiP makes it worse.
+- **G-CSF, BPTI and acid phosphatase together** — BiP overexpression helped
+  none of them. A published negative, which is rare and valuable.
+- ***A. niger* glucose oxidase** — BiP overexpression actively hurt.
+
+Three campaigns were **excluded for lack of a usable sequence**, and the
+exclusions are recorded in the file. The costliest is the hydrophobic cutinase
+mutant CY028: wild type secretes at 25 mg/g and the hydrophobic point-mutant at
+2 mg/g, which would have been the sharpest possible test of our hydropathy
+heuristics. The mutations are not in the abstract and the variant has no
+accession.
+
+## The freeze, made auditable rather than trust-based
+
+The feasibility report's condition was blunt: *"If the tool is adjusted after
+seeing the answers, the test is worthless."*
+
+**"Don't look" cannot be audited.** What can:
+
+1. `freeze_predictions.py` **imports the real resolver** instead of
+   reimplementing it.
+2. The predictions file carries a **SHA-256**:
+   `a50fe5c8ebf3679aeb6a6b344fbf855cd20005585a81015e0d6b4b28219c3c9f`.
+3. The manifest records the **git commit** it ran at — `7c1029c` — and that the
+   tree was **clean**.
+4. **The scoring mapping is frozen in its own earlier commit.** This is the
+   part that actually matters: a mapping written after the answers lets every
+   near-miss be argued into a hit.
+5. The manifest declares the test **void** if the resolver, the elongation
+   layer, the chassis object or the mapping changes before scoring. Re-freeze,
+   do not proceed.
+
+**And I wrote down what is not blind.** The predictions are blind. The choice
+of proteins is not, because assembling a set of campaigns means reading which
+campaigns exist. Pretending otherwise would have been the dishonest move.
+
+### Seven ways to lose, declared in advance
+
+The mapping file lists seven categories of campaign action the chassis
+**cannot express at all**: PMR1 disruption, other protease deletions,
+cultivation conditions, vesicle trafficking, mutating the product itself,
+promoter choice, host change. Each will score a **miss by construction**.
+
+Declaring them before the answers is what separates a test from a sales pitch,
+and it will make the recall number worse than it would otherwise look.
+
+## The result, with no answers read
+
+**MOD-secretion is predicted for 18 of 18 targets. MOD-burden for 18 of 18.**
+
+| Module | Targets |
+|---|---:|
+| **MOD-secretion** | **18 of 18** |
+| **MOD-burden** | **18 of 18** |
+| MOD-glycan | 4 of 18 |
+| MOD-sugarnt | 4 of 18 |
+
+Under the frozen mapping, **every chaperone campaign in the literature lands on
+MOD-secretion** — PDI, BiP, Kar2, Ssa1, Ydj1, Sec63, HAC1, signal-peptide
+choice, gene dosage. All of it maps to one module the chassis names for every
+secreted protein without exception.
+
+**So the chassis will score near-perfect recall and exactly zero
+discrimination.** That is not a claim about the papers. It is arithmetic about
+the tool, readable off the frozen predictions.
+
+The feasibility report called this shot word for word: *"A tool that recommends
+PDI for everything scores well on a set of successes and fails completely
+here."* **It recommends PDI for everything.**
+
+### Why
+
+Two triggers fire unconditionally. **E3, secretion capacity, fires on
+`secreted == True` and nothing else** — the chassis has no way to say *this
+protein will secrete adequately unaided*. **G2, burden control, carries
+`always_required: true`**, so it is in every answer by construction.
+
+### The pair that points the wrong way
+
+| | cysteine pairs | sequons | modules predicted |
+|---|---:|---:|---|
+| Prochymosin — **helped** | 3 | 2 | burden, glycan, secretion, sugarnt |
+| Thaumatin — **not helped** | **8** | 0 | burden, secretion |
+
+**Thaumatin carries nearly three times the disulfide load of the protein the
+chaperones rescued.** The tool's one quantitative handle on folding difficulty
+points at the wrong member of the pair — and it does not use that handle to
+decide anything, so it fails to have an opinion rather than getting it wrong.
+
+### The hit that proves nothing
+
+*P. furiosus* β-glucosidase has **zero cysteines** and PDI helped it anyway.
+The chassis predicts MOD-secretion and **will be scored a hit — for the wrong
+reason.** It did not reason about PDI as a general chaperone. It said secretion
+engineering because the protein is secreted, as it does for everything. A
+scoring table counting that as success measures nothing.
+
+## Decisions recorded
+
+| Decision | Against | Why |
+|---|---|---|
+| Freeze the mapping in its own commit before predictions | Writing it at scoring time | A mapping written after the answers converts every near-miss into a hit |
+| Bind predictions to a SHA-256 and a git commit | Asserting the test was blind | Intentions are not auditable; a hash is |
+| Declare unmapped action categories as misses up front | Judging them case by case later | Case-by-case judgement after the answers is how a test becomes a sales pitch |
+| State what is *not* blind | Claiming a fully blind test | The protein choice required reading abstracts, and saying so costs nothing |
+| Import the real resolver | Reimplementing it in the harness | A copy can drift from the tool being tested |
+| Publish the 18-of-18 finding before scoring | Waiting for the full score | Stating it now means it cannot later be claimed as a prediction |
+| Exclude campaigns without a usable sequence | Reconstructing sequences by inference | An inferred sequence is a fabricated target |
+
+## What is not done
+
+- **No answer has been read or scored.** The commit contains predictions only.
+- **18 rows, not the 30 to 50** the feasibility report called for. Growing the
+  set will not change the 18-of-18 problem; it will only measure it more
+  precisely.
+- **Five of the 18 rows are not *S. cerevisiae*** — *P. pastoris*, *K. lactis*,
+  *H. polymorpha*. The chassis is defined on *S. cerevisiae* only, so each is a
+  transfer assumption.
+- **Three decades separate the oldest and newest paper**, across incomparable
+  strains, vectors and assays, and nothing in the set records that yet.
+- **Product class is assigned from the protein's origin** in the freeze script,
+  not read off the sequence. It decides whether MOD-glycan fires, so it is a
+  real assumption rather than a detail.
+- **Precision stays mostly unmeasurable.** A paper silent on chaperones may
+  mean the chassis over-prescribed or may mean nobody tried.
+- **Stated before scoring so it cannot be claimed afterwards:** expect high
+  recall, near-zero discrimination. **If that is the result, the conclusion is
+  not that the chassis passed.** It is that `MOD-secretion` as defined is not a
+  prediction, and the chassis needs a way to decide *which* proteins need
+  secretion help rather than asserting all of them do. That is a design change,
+  and this test will have earned it.
 
 ---
 
