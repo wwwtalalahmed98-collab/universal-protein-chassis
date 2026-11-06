@@ -4,6 +4,7 @@ The durable record. Newest checkpoint at the top. Each entry is written to be
 readable without the conversation it came from.
 
 ## Checkpoints
+1. **2026-11-06 - The goal restated by the owner, and one distinction preserved** (below)
 1. **2026-11-06 - Judgement scored: recall 100%, discrimination 0 of 2** (below)
 1. **2026-11-06 - The validation set is frozen, and the freeze found the problem** (below)
 1. **2026-11-05 - The chassis consumes the layer, and a known error is out** (below)
@@ -25,6 +26,131 @@ readable without the conversation it came from.
 3. **2026-10-20 — The target is a universal chassis**
 4. **2026-10-20 — How we got here, and what HostMatch is**
 5. **2026-10-17 — The big database does not have what we needed**
+
+---
+
+# 2026-11-06 — The goal restated by the owner, and one distinction preserved
+
+Not a build. A direction-setting entry, recorded because in six weeks the
+reasoning behind the project's shape needs to be findable.
+
+## What was stated
+
+> *"My vision is to make a universal protein chassis that has the ability to
+> produce, if not any type, but different types of protein. It has all those
+> capabilities on the genomic level, on the metabolomic level, on the cellular
+> level, on whatever level that is required. We will integrate this and make
+> this happen, that we will claim that this chassis is the one that will produce
+> your desired protein. That is the ultimate goal. We will not be looking
+> anywhere here and there."*
+
+And: no error, large or small, is to slow the project or turn it backward.
+
+## The refinement inside it, which is a strengthening
+
+**"If not any type, but different types of protein."**
+
+That is the **second** useful narrowing the owner has made, and like the first
+it makes the project more defensible rather than less:
+
+| | From | To |
+|---|---|---|
+| 2026-10-23 | any biotech product | any protein |
+| **2026-11-06** | **any protein** | **different types of protein** |
+
+"Any protein" is a claim no chassis can support, and the project already holds
+the counter-evidence: two architecturally similar antibody fragments diverged
+under identical engineering. **"Different types of protein" is a claim that can
+be specified, tested and met** — by product class, by what the molecule needs
+rather than by its identity. The capability set is already organised that way.
+
+**Recorded as the live target. It should not be softened back to "any protein"
+in later documents.**
+
+## The levels named, against what exists
+
+The owner named the depth required: genomic, metabolomic, cellular, "whatever
+level is required". Those map onto the theory stack, so the honest count is
+available:
+
+| Level named | Layer in the stack | State |
+|---|---|---|
+| Genomic | 1c elongation, from the tRNA gene complement | **built, validated externally** |
+| Genomic | 1a transcription thermodynamics | specified, no parameters |
+| Genomic | 1b yeast translation initiation | **no model of standing exists** |
+| Cellular | 2 growth coupling | built, first pass, fails gate 4 |
+| Cellular | 3 resource competition | specified, no parameters |
+| Metabolomic | 4 enzyme-constrained metabolism | model loads and solves, unconstrained |
+| Metabolomic | 5 secretory costs | model loads, no cost extracted |
+| Cellular | 6 noise | not started |
+
+**One of eight established on external evidence. One more partly built. Six
+with no parameters at all.** That is the distance between the vision and today,
+stated as a number rather than a mood.
+
+## The one distinction being preserved
+
+"We will never look backward" is taken as **do not be deterred**. It is not
+taken as **do not revisit conclusions**, and the difference is load-bearing,
+because every significant advance this project has made came from a backward
+look:
+
+- 40% of the proteome read as a spendable budget → **it is the point of zero
+  yield**; the optimum is 20%
+- MATLAB believed to be the central obstacle → **never required to use the
+  models**; 1.6 MB download, solves in six seconds
+- scope narrowed to proteins → **two of four architectural rules evaporated**
+- `MOD-secretion` believed to be a prediction → **scored 0 of 2 on
+  discrimination**; it is a label applied to everything
+
+Each was a reversal. Each moved the project toward the goal. **So: never dwell,
+always re-examine.** If the stronger reading is ever meant — leave a wrong
+conclusion standing because revisiting feels like retreat — it has to be said
+out loud, because that is the one thing that would quietly destroy the tool's
+credibility while appearing to protect it.
+
+## What the claim will cost
+
+The owner wants to be able to say: *this chassis will produce your desired
+protein.*
+
+**Today that claim is not supportable, and the project knows exactly why.**
+Yesterday's score: recall 100%, precision 57%, **discrimination 0 of 2**. The
+chassis names secretion engineering for every secreted protein, so it cannot
+tell the protein a chaperone rescues from the one it does not.
+
+**The gap between the vision and the current state is not vagueness. It is four
+named, specific fixes**, recorded in `reports/05-retrospective-score.md`:
+
+1. `MOD-secretion` must become conditional — and this set rules out disulfide
+   count as the condition
+2. `MOD-secretion` must split, because PDI, BiP, signal peptide and gene dosage
+   have opposite effects on the same protein
+3. `MOD-burden` must leave the per-protein answer
+4. There must be an output meaning *this protein needs nothing*
+
+**That is the work the vision implies next.** Not more surface, more
+discrimination.
+
+## Decisions recorded
+
+| Decision | Against | Why |
+|---|---|---|
+| "Different types of protein" is the live target | "Any protein" | The narrower claim is testable and the project's own evidence contradicts the wider one |
+| "Never look backward" read as "never be deterred" | Read as "never revisit" | Every advance so far came from revisiting; the other reading would destroy the tool's credibility |
+| State the one-of-eight layer count beside the vision | Restating the vision alone | The owner cannot check the work, so the distance has to be a number |
+| Next work is discrimination, not breadth | Adding more capabilities or layers | A tool that says the same thing about every protein does not get better by saying it about more proteins |
+
+## What is not done
+
+- **Nothing was built this turn.** This is a direction record.
+- The four fixes above are **diagnosed and unimplemented**.
+- Six of eight theory layers still have **no parameters**.
+- The validation set is **18 rows with 2 differential pairs**, against the 30 to
+  50 and several times the pairs that would make the scores robust.
+- **Layer 1b has no model to build on at all**, so "full depth at the genomic
+  level" has a hole in it that no amount of effort closes until the field
+  produces one.
 
 ---
 
