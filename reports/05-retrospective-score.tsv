@@ -1,0 +1,19 @@
+accession	protein	pmid	outcome	verdict	needed	predicted	unmapped
+P01127	Human PDGF-B	7764684	helped	hit	MOD-secretion	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	-
+P08091	Acid phosphatase	7764684	helped	hit	MOD-secretion	MOD-burden;MOD-secretion	-
+P02768	Human serum albumin	11470515	helped	hit	MOD-secretion	MOD-burden;MOD-secretion	-
+P01584	Human interleukin-1 beta	11470515	not_helped	false positive	MOD-secretion	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	-
+P00794	Bovine prochymosin	8987725	helped	hit	MOD-secretion	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	PMR1 disruption
+P02883	Thaumatin I	8987725	not_helped	false positive	MOD-secretion	MOD-burden;MOD-secretion	PMR1 disruption
+Q51723	Beta-glucosidase CelB	14748090	helped	hit	MOD-secretion	MOD-burden;MOD-secretion	-
+P09919	Human G-CSF	8626555	not_helped	false positive	MOD-secretion	MOD-burden;MOD-secretion	-
+P00974	Bovine pancreatic trypsin inhibitor	8626555	not_helped	false positive	MOD-secretion	MOD-burden;MOD-secretion	-
+P08091	Acid phosphatase	8626555	not_helped	false positive	MOD-secretion	MOD-burden;MOD-secretion	-
+P00590	Cutinase 1 wild type	9435084	none_reported	no answer	-	MOD-burden;MOD-secretion	-
+P13006	Glucose oxidase	11954796	hurt	false positive	MOD-secretion	MOD-burden;MOD-secretion	-
+P08362	Measles hemagglutinin	25907596	helped	unreachable	-	MOD-burden;MOD-secretion	Temperature, heat shock or cultivation condition
+P11021	Human GRP78 / BiP	25907596	helped	unreachable	-	MOD-burden;MOD-secretion	Temperature, heat shock or cultivation condition
+P01308	Human preproinsulin	9126604	helped	hit	MOD-secretion	MOD-burden;MOD-secretion	-
+O76744	Ancylostoma secreted protein 1	16255058	helped	hit	MOD-secretion	MOD-burden;MOD-secretion	-
+P05019	Human IGF-1	1756863	helped	unreachable	-	MOD-burden;MOD-secretion	Point mutation of the product itself
+P04837	Bovine follitropin subunit beta	17498970	helped	hit	MOD-secretion	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	-

@@ -1,0 +1,41 @@
+# Retrospective validation set, version 1 — ANSWERS
+#
+# What each campaign actually did, and whether it worked.
+#
+# EXTRACTED AFTER validation/predictions-v1.tsv WAS COMMITTED AND HASHED.
+# Freeze commit 7c1029c, predictions sha256 a50fe5c8ebf3679ae...
+# scripts/score_validation.py refuses to score if the frozen code has changed.
+#
+# SOURCE: PubMed abstracts, retrieved 2026-11-06 via the PubMed E-utilities.
+# ABSTRACTS ONLY. No full text was retrieved. reports/03 flagged this: outcomes
+# often sit in full text, and an abstract may omit a modification that was tried.
+# Where an abstract is silent, the row records "none reported", which is NOT the
+# same as "nothing was needed" — that is the publication-bias problem, and it is
+# why precision is only computed on rows where the authors explicitly tested a
+# modification and reported it failing.
+#
+# COLUMNS
+#   actions   semicolon-separated, using the exact action vocabulary of
+#             validation/mapping-v1.tsv so the join is mechanical, not judged
+#   outcome   helped | not_helped | hurt | none_reported
+#   quote     verbatim from the abstract, the basis for the row
+#
+# accession	pmid	pair_id	actions	outcome	quote
+P01127	7764684	pdi-1	PDI overexpression	helped	Overexpression of protein disulfide isomerase (PDI) from a single chromosomally integrated copy in Saccharomyces cerevisiae results in ten-fold higher levels of secretion of human platelet derived growth factor B homodimer
+P08091	7764684	pdi-1	PDI overexpression	helped	a four-fold increase in secretion of Schizosaccharomyces pombe acid phosphatase
+P02768	11470515	pdi-2	PDI overexpression;Polyubiquitin gene duplication	helped	Duplication of either one of these genes had a strong stimulating effect on the production of the highly disulfide-bonded serumalbumin
+P01584	11470515	pdi-2	PDI overexpression;Polyubiquitin gene duplication	not_helped	Duplication of either one of these genes had a strong stimulating effect on the production of the highly disulfide-bonded serumalbumin, but not of interleukin 1 beta
+P00794	8987725	bip-1	BiP / Kar2 overexpression;PMR1 disruption	helped	a tenfold increase in the level of binding protein ... caused more than a 20-fold increase in the amount of extracellular prochymosin. By additional disruption of the PMR1 gene of these cells we were able to obtain secretion of virtually all of the prochymosin produced
+P02883	8987725	bip-1	BiP / Kar2 overexpression;PMR1 disruption	not_helped	Export of thaumatin, on the other hand, was not significantly stimulated by binding protein overexpression
+Q51723	14748090	pdi-3	PDI overexpression	helped	increasing PDI levels increased beta-glucosidase secretion. The action of PDI was unexpected because beta-glucosidase is not a disulfide-bonded protein
+P09919	8626555	bip-2	BiP / Kar2 overexpression	not_helped	5-fold BiP overexpression from a constitutive glycolytic promoter did not substantially increase or decrease secretion titers
+P00974	8626555	bip-2	BiP / Kar2 overexpression	not_helped	5-fold BiP overexpression from a constitutive glycolytic promoter did not substantially increase or decrease secretion titers
+P08091	8626555	bip-2	BiP / Kar2 overexpression	not_helped	5-fold BiP overexpression from a constitutive glycolytic promoter did not substantially increase or decrease secretion titers
+P00590	9435084	cut-1	none reported	none_reported	Wild-type cutinase was secreted at up to 25 mg per g (dry weight), while CY028 was secreted at a level of 2 mg per g (dry weight). The abstract reports no host modification applied to the wild type; the comparison is between two product variants.
+P13006	11954796	bip-3	BiP / Kar2 overexpression	hurt	artificially enhanced BiP levels strongly affected GOX secretion and led to accumulation of this protein in the ER-like vesicles
+P08362	25907596	mea-1	Temperature, heat shock or cultivation condition	helped	heat shock with subsequent induction of MeH expression at 37 degrees C improved translocation of MeH precursors when applied at higher cell densities
+P11021	25907596	mea-1	Temperature, heat shock or cultivation condition	helped	The same temperature conditions increased both secretion titer and yield of another heterologous protein human GRP78/BiP by about 50%
+P01308	9126604	ins-1	Signal peptide or leader engineering	helped	synthetic leader sequences for secretion of the insulin precursor were developed ... The synthetic leaders efficiently facilitate secretion of the insulin precursor from S. cerevisiae when compared with the alpha-factor leader
+O76744	16255058	asp-1	PDI overexpression;Gene dosage or copy-number tuning	helped	Overexpression of the endoplasmic reticulum (ER) resident, homologous chaperone protein, protein disulfide isomerase (PDI) was able to increase the secretion of (Na-ASP1) protein in high copy clones
+P05019	1756863	igf-1	Point mutation of the product itself	helped	These dimers are not formed in an IGF1 mutant where Lys27 has been replaced by glutamic acid
+P04837	17498970	fsh-1	PDI overexpression	helped	The co-expression of bFSH and hPDI is increased to 1.56 mg/l of heterodimer in the culture medium, which is 6-fold higher when compared with the control strain carrying the bFSH gene only
