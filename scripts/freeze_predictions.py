@@ -197,7 +197,12 @@ def main():
     with open(OUT, "rb") as fh:
         digest = hashlib.sha256(fh.read()).hexdigest()
 
-    status = git("status", "--porcelain")
+    # Dirtiness must exclude the two files this script just wrote, or the flag
+    # reports its own output and tells you nothing about the code that ran.
+    OWN = {"validation/predictions-v1.tsv", "validation/freeze-v1.json"}
+    dirty_paths = sorted(
+        p for p in (l[3:].strip() for l in git("status", "--porcelain").splitlines() if l)
+        if p and p not in OWN)
     manifest = {
         "frozen_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "predictions_file": "validation/predictions-v1.tsv",
@@ -205,7 +210,8 @@ def main():
         "targets_file": "validation/targets-v1.tsv",
         "mapping_file": "validation/mapping-v1.tsv",
         "git_commit_at_freeze": git("rev-parse", "HEAD"),
-        "git_tree_dirty_at_freeze": bool(status),
+        "git_tree_dirty_at_freeze": bool(dirty_paths),
+        "git_dirty_paths_at_freeze": dirty_paths,
         "chassis_id": chassis["chassis_id"],
         "chassis_schema_version": chassis["schema_version"],
         "rows_predicted": len(out),
@@ -253,7 +259,11 @@ def main():
             print("  FAILED              : %s (%s)" % (acc, why))
     print("  predictions sha256  : %s" % digest)
     print("  git commit          : %s" % (manifest["git_commit_at_freeze"] or "unknown"))
-    print("  tree dirty          : %s" % manifest["git_tree_dirty_at_freeze"])
+    print("  tree dirty          : %s%s" % (manifest["git_tree_dirty_at_freeze"],
+        ("  -> " + ", ".join(dirty_paths[:4])) if dirty_paths else ""))
+    if dirty_paths:
+        print("  NOT A CLEAN FREEZE. Commit the tree and re-run, or the git")
+        print("  commit recorded above does not describe the code that ran.")
     print("  answers read        : NO")
     print()
     print("  Commit validation/predictions-v1.tsv, validation/freeze-v1.json,")

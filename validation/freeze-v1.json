@@ -1,0 +1,15 @@
+{
+ "frozen_at_utc": "2026-11-06T10:25:32Z",
+ "predictions_file": "validation/predictions-v1.tsv",
+ "predictions_sha256": "a50fe5c8ebf3679aeb6a6b344fbf855cd20005585a81015e0d6b4b28219c3c9f",
+ "targets_file": "validation/targets-v1.tsv",
+ "mapping_file": "validation/mapping-v1.tsv",
+ "git_commit_at_freeze": "d5b0c53c2cb11631ff5a3efdfa27fc47ee54b157",
+ "git_tree_dirty_at_freeze": true,
+ "chassis_id": "UCP-1",
+ "chassis_schema_version": "1.1",
+ "rows_predicted": 18,
+ "rows_failed": [],
+ "answers_read": false,
+ "void_if": "scripts/chassis_resolve.py, scripts/elongation.py, chassis/chassis-v1.json or validation/mapping-v1.tsv changes between this freeze and scoring. Re-freeze instead."
+}

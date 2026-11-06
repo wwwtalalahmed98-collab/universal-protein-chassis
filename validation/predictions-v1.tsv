@@ -1,0 +1,23 @@
+# Retrospective validation set, version 1 — FROZEN PREDICTIONS
+# Produced by scripts/freeze_predictions.py from sequence alone.
+# NO CAMPAIGN OUTCOME WAS CONSULTED. See validation/protocol-v1.md.
+# Scored only through validation/mapping-v1.tsv, frozen in the same commit.
+accession	protein	host	case_type	pair_id	pmid	length_aa	cysteines	cys_pairs	sequons	signal_peptide	tm_segments	product_class_used	caps_active	caps_engineered	modules_predicted	codon_best	codon_worst	seq_source
+P01127	Human PDGF-B	S. cerevisiae	success	pdi-1	7764684	241	11	5	1	True	0	therapeutic	19	B4;D5;E3;G2	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	0.6951	0.0622	cache
+P08091	Acid phosphatase	S. cerevisiae	success	pdi-1	7764684	453	9	4	9	True	0	enzyme	17	E3;G2	MOD-burden;MOD-secretion	0.6832	0.136	cache
+P02768	Human serum albumin	K. lactis	differential_helped	pdi-2	11470515	609	35	17	0	True	0	therapeutic	16	E3;G2	MOD-burden;MOD-secretion	0.6936	0.1229	cache
+P01584	Human interleukin-1 beta	K. lactis	differential_not_helped	pdi-2	11470515	269	5	2	1	False	0	therapeutic	19	B4;D5;E3;G2	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	0.7171	0.1557	cache
+P00794	Bovine prochymosin	S. cerevisiae	differential_helped	bip-1	8987725	381	7	3	2	True	0	therapeutic	19	B4;D5;E3;G2	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	0.7047	0.1393	cache
+P02883	Thaumatin I	S. cerevisiae	differential_not_helped	bip-1	8987725	235	17	8	0	True	0	enzyme	16	E3;G2	MOD-burden;MOD-secretion	0.6781	0.1065	cache
+Q51723	Beta-glucosidase CelB	S. cerevisiae	differential_helped	pdi-3	14748090	472	1	0	0	False	0	enzyme	15	E3;G2	MOD-burden;MOD-secretion	0.7226	0.132	cache
+P09919	Human G-CSF	S. cerevisiae	negative	bip-2	8626555	207	5	2	0	True	0	therapeutic	16	E3;G2	MOD-burden;MOD-secretion	0.6826	0.1038	cache
+P00974	Bovine pancreatic trypsin inhibitor	S. cerevisiae	negative	bip-2	8626555	100	8	4	0	True	0	enzyme	16	E3;G2	MOD-burden;MOD-secretion	0.6625	0.085	cache
+P08091	Acid phosphatase	S. cerevisiae	negative	bip-2	8626555	453	9	4	9	True	0	enzyme	17	E3;G2	MOD-burden;MOD-secretion	0.6832	0.136	cache
+P00590	Cutinase 1 wild type	S. cerevisiae	differential_helped	cut-1	9435084	230	4	2	0	True	0	enzyme	16	E3;G2	MOD-burden;MOD-secretion	0.7204	0.0869	cache
+P13006	Glucose oxidase	H. polymorpha	negative	bip-3	11954796	605	3	1	8	True	0	enzyme	17	E3;G2	MOD-burden;MOD-secretion	0.7128	0.1197	cache
+P08362	Measles hemagglutinin	S. cerevisiae	success	mea-1	25907596	617	13	6	5	False	1	enzyme	17	E3;G2	MOD-burden;MOD-secretion	0.707	0.1054	cache
+P11021	Human GRP78 / BiP	S. cerevisiae	success	mea-1	25907596	654	2	1	0	True	1	therapeutic	16	E3;G2	MOD-burden;MOD-secretion	0.7648	0.1289	cache
+P01308	Human preproinsulin	S. cerevisiae	success	ins-1	9126604	110	6	3	0	True	0	therapeutic	16	E3;G2	MOD-burden;MOD-secretion	0.6765	0.0933	cache
+O76744	Ancylostoma secreted protein 1	P. pastoris	success	asp-1	16255058	424	21	10	1	True	0	enzyme	17	E3;G2	MOD-burden;MOD-secretion	0.6827	0.1432	cache
+P05019	Human IGF-1	S. cerevisiae	success	igf-1	1756863	195	11	5	0	False	0	therapeutic	16	E3;G2	MOD-burden;MOD-secretion	0.6863	0.0853	cache
+P04837	Bovine follitropin subunit beta	P. pastoris	success	fsh-1	17498970	129	17	8	2	True	0	therapeutic	19	B4;D5;E3;G2	MOD-burden;MOD-glycan;MOD-secretion;MOD-sugarnt	0.6217	0.1133	cache
