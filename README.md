@@ -38,6 +38,9 @@ python -I scripts/validate_elongation.py
 
 # Freeze the chassis's predictions for the validation set, before reading any answer
 python -I scripts/freeze_predictions.py
+
+# Score them against what the campaigns actually did (refuses if the freeze broke)
+python -I scripts/score_validation.py
 ```
 
 No dependencies beyond the Python standard library.

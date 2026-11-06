@@ -4,6 +4,7 @@ The durable record. Newest checkpoint at the top. Each entry is written to be
 readable without the conversation it came from.
 
 ## Checkpoints
+1. **2026-11-06 - Judgement scored: recall 100%, discrimination 0 of 2** (below)
 1. **2026-11-06 - The validation set is frozen, and the freeze found the problem** (below)
 1. **2026-11-05 - The chassis consumes the layer, and a known error is out** (below)
 1. **2026-11-04 - The elongation layer is tested against real cells** (below)
@@ -24,6 +25,175 @@ readable without the conversation it came from.
 3. **2026-10-20 — The target is a universal chassis**
 4. **2026-10-20 — How we got here, and what HostMatch is**
 5. **2026-10-17 — The big database does not have what we needed**
+
+---
+
+# 2026-11-06 — The chassis's judgement is scored, and it fails the test it was given
+
+Records: [`reports/05-retrospective-score.md`](../reports/05-retrospective-score.md),
+[`reports/05-retrospective-score.tsv`](../reports/05-retrospective-score.tsv),
+[`validation/answers-v1.tsv`](../validation/answers-v1.tsv),
+[`scripts/score_validation.py`](../scripts/score_validation.py).
+
+## The number the project has been working toward for three weeks
+
+`goal-definition-v1.md` set the falsifiable claim:
+
+> *Given a protein sequence alone, the chassis predicts the host modifications
+> that published campaigns actually found necessary, in N of M cases.*
+
+**N of M is now known.**
+
+| | | |
+|---|---:|---|
+| **Recall** | **8 of 8 = 100%** | of the campaign actions the chassis can express |
+| **Precision** | **8 of 14 = 57%** | on rows where authors tested a fix and reported it failing |
+| **Discrimination** | **0 of 2** | differential pairs called differently |
+
+## Read in the right order, this is a failure
+
+**100% recall is not an achievement.** `MOD-secretion` was predicted for **18
+of 18** targets, and every chaperone campaign in the literature maps to it. The
+recall number is what *always saying yes* looks like.
+
+**Discrimination is the result.** In both differential pairs the authors applied
+one modification to two proteins and it worked for exactly one:
+
+| pair | helped | not helped | chassis said |
+|---|---|---|---|
+| bip-1 | Bovine prochymosin | Thaumatin I | **MOD-secretion for both** |
+| pdi-2 | Human serum albumin | Interleukin-1β | **MOD-secretion for both** |
+
+**Identical call for all four proteins.** The chassis does not get these wrong
+so much as fail to have an opinion — the trigger is "is this protein secreted",
+and all four are.
+
+And the disulfide numbers rule out the obvious fix. Prochymosin **3** pairs
+(helped) versus thaumatin **8** (not helped) — wrong direction. Albumin **17**
+(helped) versus IL-1β **2** (not helped) — right direction. **Disulfide load
+does not separate these pairs**, and the chassis does not use it to decide
+anything regardless.
+
+## Six false positives that are real, not merely unverifiable
+
+Precision is usually unmeasurable here, because a silent paper might mean nobody
+tried. These six escape that: the authors applied the modification and reported
+it not working.
+
+Interleukin-1β, thaumatin, G-CSF, bovine pancreatic trypsin inhibitor,
+*S. pombe* acid phosphatase — and **_A. niger_ glucose oxidase, where BiP
+overexpression made secretion worse** and the protein piled up in the ER.
+
+**The chassis recommended the module that would have caused the damage.**
+
+### The row that shows the module is too coarse
+
+*S. pombe* acid phosphatase is in the set **twice, from two papers**. PDI helped
+it four-fold. BiP did nothing for it. Both map to `MOD-secretion`.
+
+**The chassis has one answer where the literature has two**, and no way to
+represent the difference between PDI and BiP at all.
+
+## The pre-registration held exactly
+
+`validation/protocol-v1.md`, committed **with the frozen predictions and before
+any answer existed**, said:
+
+> *"Expect high recall and near-zero discrimination. The chassis will name the
+> right module most of the time because it names that module every time."*
+
+> *"If that is what the scoring shows, the right conclusion is not that the
+> chassis passed. It is that MOD-secretion as currently defined is not a
+> prediction."*
+
+Recall 100%, discrimination 0 of 2. **The prediction was exact.**
+
+That matters beyond being right: the finding could not be dressed up afterwards,
+because the expectation and the scoring rule were both in git before the answers
+were extracted.
+
+### And the freeze was checked rather than assumed
+
+`score_validation.py` refuses to score unless the predictions still hash to
+`a50fe5c8ebf3679ae…` and none of `chassis_resolve.py`, `elongation.py`,
+`chassis-v1.json` or `mapping-v1.tsv` has changed since freeze commit `7c1029c`.
+All five checks passed, printed, before any score was computed.
+
+## Three rows the chassis could not win, declared in advance
+
+Two heat-shock campaigns, and **human IGF-1, where the fix was to mutate the
+product itself** — Lys27→Glu27, to stop it dimerising.
+
+**The chassis takes the sequence as fixed input**, so an entire class of real
+solution is outside what it can propose. That is a scope limit nobody had
+noticed, and it took a real campaign to surface it.
+
+## What this diagnoses, precisely
+
+**The defect is not that the chassis is wrong. Two of its five modules are not
+predictions.**
+
+- **E3 / `MOD-secretion`** fires on `secreted == True` and nothing else.
+- **G2 / `MOD-burden`** carries `always_required: true`.
+
+Both are in every answer by construction, and a field that never varies carries
+no information. For a secreted protein, most of what this tool says is one of
+those two.
+
+`MOD-glycan` and `MOD-sugarnt` fire **4 of 18** and are doing real work — but
+**no glycoengineering campaign reached the 14 papers**, so the two modules that
+discriminate were never tested. **That is a gap in the set, not a credit to the
+chassis.**
+
+## What the chassis would need in order to pass
+
+1. **`MOD-secretion` must become conditional** — a reason to fire for one
+   secreted protein and not another. This set rules out disulfide count as that
+   reason.
+2. **`MOD-secretion` must split.** PDI, BiP, signal peptide and gene dosage have
+   different and sometimes opposite effects on the same protein. One module
+   cannot say "PDI yes, BiP no", which is the actual answer for both
+   β-glucosidase and acid phosphatase.
+3. **`MOD-burden` must stop being always-required**, or leave the per-protein
+   answer and be stated once as a property of the chassis.
+4. **There must be an output meaning "this protein needs nothing."** There is
+   none today, and for wild-type cutinase — 25 mg/g with no reported
+   modification — that was the correct answer.
+
+**None of this is implemented.** The report is the evidence it is needed.
+
+## Decisions recorded
+
+| Decision | Against | Why |
+|---|---|---|
+| Report recall, precision and discrimination separately | One accuracy figure | They mean different things under publication bias, and one number would have read as a pass |
+| Lead with discrimination | Leading with 100% recall | Recall is trivially satisfied by a tool that always says yes, which is what this one does |
+| Exclude unwinnable rows from recall, count them visibly | Folding them into the denominator | Hiding them would flatter the score; declaring them in advance was the point |
+| Compute precision only on explicitly-tested failures | Treating silence as a false positive | Silence is uninterpretable; tested failure is not |
+| Make the scorer refuse on a broken freeze | Trusting that nothing changed | A promise is not auditable; a hash and a git diff are |
+| Publish the diagnosis without fixing it | Fixing the resolver in the same turn | A fix in the same commit as the score would void the freeze and the test |
+
+## What is not established
+
+- **Answers come from abstracts only.** No full text retrieved. A modification
+  reported only in a paper's body is missing, which can only make recall look
+  better than it is.
+- **The denominators are small**: recall on 8 rows, precision on 14,
+  discrimination on 2 pairs. One reclassified row moves recall 12 points.
+- **Two differential pairs is thin.** It is the honest yield of 14 papers and it
+  should be several times larger.
+- **Precision is not the chassis's false-positive rate** — only the rate on rows
+  where someone published a failure.
+- **Five of 18 rows are not *S. cerevisiae***, so they carry a host-transfer
+  assumption.
+- **Three decades separate oldest and newest paper**, across incomparable
+  strains, vectors and assays, and the set does not record those differences.
+- **Product class was assigned by hand**, not computed, and it decides whether
+  `MOD-glycan` fires on four rows.
+- **Nothing tests titre.** The chassis says which modules a product needs, never
+  how much product you get.
+- **The project's strongest counter-evidence is still outside the set** — the
+  architecturally similar scFv pair that diverged under identical engineering.
 
 ---
 
