@@ -1,0 +1,54 @@
+# Retrospective validation set, version 1 — TARGETS
+#
+# Proteins whose expression in a yeast host is documented in a published
+# campaign that states what was engineered. Assembled 2026-11-06 from PubMed.
+# Every accession was resolved against the UniProt REST API; every pmid and doi
+# comes from the PubMed record, not from memory.
+#
+# WHY THIS SET LOOKS LOPSIDED, ON PURPose
+# reports/03-validation-set-feasibility.md concluded that successes test recall
+# while only DIFFERENTIAL cases test discrimination, and that the set should be
+# built around them deliberately. 11 of the 18 rows below belong to a
+# differential or negative result: the same modification helped one protein and
+# not another, or helped nothing at all. Those are the rows that can falsify the
+# chassis rather than flatter it.
+#
+# CASE TYPES
+#   differential_helped      paired with a protein the same modification did NOT help
+#   differential_not_helped  the other half of such a pair
+#   negative                 the modification did not help, or actively hurt
+#   success                  campaign reports a modification that worked
+#
+# pair_id links the two halves of a differential pair, or the members of a
+# negative panel tested together in one experiment.
+#
+# EXCLUDED, AND WHY — recorded so the set's gaps are visible
+#   Hydrophobic cutinase mutant CY028 (pmid 9435084). The paper's differential is
+#     wild-type versus a hydrophobic point-mutant of the SAME protein, which is
+#     the sharpest possible test of our hydropathy heuristics. The mutant has no
+#     UniProt accession and the abstract does not give the substitutions, so its
+#     sequence cannot be reconstructed. Its wild-type partner is included.
+#   Bivalent anti-CD3 immunotoxin (pmid 16151122). A fusion construct with no
+#     single accession.
+#   Architecturally similar scFv pair (recorded in protocol/scope-proteins-v1.md).
+#     No PubMed record was resolved for it in this pass.
+#
+# accession	protein	organism_of_origin	host	case_type	pair_id	pmid	doi
+P01127	Human PDGF-B	Homo sapiens	S. cerevisiae	success	pdi-1	7764684	10.1038/nbt0494-381
+P08091	Acid phosphatase	S. pombe	S. cerevisiae	success	pdi-1	7764684	10.1038/nbt0494-381
+P02768	Human serum albumin	Homo sapiens	K. lactis	differential_helped	pdi-2	11470515	10.1016/s0378-1119(01)00564-9
+P01584	Human interleukin-1 beta	Homo sapiens	K. lactis	differential_not_helped	pdi-2	11470515	10.1016/s0378-1119(01)00564-9
+P00794	Bovine prochymosin	Bos taurus	S. cerevisiae	differential_helped	bip-1	8987725	10.1007/BF00166231
+P02883	Thaumatin I	T. daniellii	S. cerevisiae	differential_not_helped	bip-1	8987725	10.1007/BF00166231
+Q51723	Beta-glucosidase CelB	P. furiosus	S. cerevisiae	differential_helped	pdi-3	14748090	10.1002/bit.10853
+P09919	Human G-CSF	Homo sapiens	S. cerevisiae	negative	bip-2	8626555	10.1074/jbc.271.17.10017
+P00974	Bovine pancreatic trypsin inhibitor	Bos taurus	S. cerevisiae	negative	bip-2	8626555	10.1074/jbc.271.17.10017
+P08091	Acid phosphatase	S. pombe	S. cerevisiae	negative	bip-2	8626555	10.1074/jbc.271.17.10017
+P00590	Cutinase 1 wild type	F. vanettenii	S. cerevisiae	differential_helped	cut-1	9435084	10.1128/AEM.64.1.316-324.1998
+P13006	Glucose oxidase	A. niger	H. polymorpha	negative	bip-3	11954796	10.1007/s00253-001-0907-2
+P08362	Measles hemagglutinin	Measles virus	S. cerevisiae	success	mea-1	25907596	10.1016/j.nbt.2015.04.001
+P11021	Human GRP78 / BiP	Homo sapiens	S. cerevisiae	success	mea-1	25907596	10.1016/j.nbt.2015.04.001
+P01308	Human preproinsulin	Homo sapiens	S. cerevisiae	success	ins-1	9126604	10.1006/prep.1996.0695
+O76744	Ancylostoma secreted protein 1	N. americanus	P. pastoris	success	asp-1	16255058	10.1002/bit.20762
+P05019	Human IGF-1	Homo sapiens	S. cerevisiae	success	igf-1	1756863	10.1016/0014-5793(91)81432-8
+P04837	Bovine follitropin subunit beta	Bos taurus	P. pastoris	success	fsh-1	17498970	10.1016/j.pep.2007.03.016

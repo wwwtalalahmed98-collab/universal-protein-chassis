@@ -1,0 +1,43 @@
+# Retrospective validation set, version 1 — ACTION TO CHASSIS MAPPING
+#
+# THIS FILE IS THE REASON THE TEST CAN MEAN ANYTHING.
+#
+# Published campaigns do things like "overexpress PDI" or "disrupt PMR1". The
+# chassis emits engineered MODULES. Scoring requires a rule connecting the two,
+# and if that rule is written AFTER the answers are read, every near-miss gets
+# argued into a hit and the test proves nothing.
+#
+# So the mapping is frozen here, before any outcome is extracted, and it is
+# committed in the same commit as the predictions.
+#
+# The unmapped rows matter most. Each one is a campaign action the chassis has no
+# way to express. They are declared now as GUARANTEED MISSES. Pre-committing to
+# that is the difference between a test and a sales pitch.
+#
+# COLUMNS
+#   action        the category of thing a campaign did
+#   maps_to       the chassis module or capability that would count as naming it
+#   basis         why that mapping is defensible, quoting the chassis object
+#
+# action	maps_to	basis
+PDI overexpression	MOD-secretion	parts_required includes "ER chaperone overexpression"
+BiP / Kar2 overexpression	MOD-secretion	parts_required includes "ER chaperone overexpression"
+Other ER chaperone (Ssa1, Ydj1, Sec63)	MOD-secretion	parts_required includes "ER chaperone overexpression"
+UPR regulator HAC1	MOD-secretion	parts_required names "UPR regulator HAC1"
+Signal peptide or leader engineering	MOD-secretion	parts_required names "signal peptide selection"
+Gene dosage or copy-number tuning	MOD-secretion	parts_required names "gene dosage tuning"
+OCH1 or ALG3 knockout	MOD-glycan	parts_required names "OCH1 knockout"
+Glycosyltransferase addition	MOD-glycan	parts_required names "GlcNAc transferase I and II, galactosyltransferase"
+Mannosidase addition	MOD-glycan	parts_required names "alpha-1,2-mannosidase"
+Sugar-nucleotide pathway or transporter	MOD-sugarnt	parts_required names "UDP-GlcNAc pathway enzymes" and the Golgi transporters
+Inducible or switchable module expression	MOD-burden	parts_required names "inducible promoter per module"
+Assembly or integration strategy for a long CDS	MOD-largecds	parts_required names "assembly strategy, integration locus choice"
+#
+# UNMAPPED — DECLARED MISSES BEFORE THE ANSWERS ARE READ
+PMR1 disruption	UNMAPPED	No capability covers Golgi calcium handling or the protease consequences of its loss. The chassis cannot name this.
+Protease deletion other than PMR1	UNMAPPED	B7 "protease balance" exists but is marked native and always-required, so it is never emitted as something to engineer. It cannot be scored as a prediction.
+Temperature, heat shock or cultivation condition	UNMAPPED	G4 "culture conditions" is native and always-required. The chassis treats process conditions as given, not designed.
+Vesicle trafficking or SNARE engineering	UNMAPPED	No capability covers post-Golgi trafficking as a separate step. E3 lumps all of secretion together.
+Point mutation of the product itself	UNMAPPED	The chassis takes the sequence as fixed input. Redesigning the product is outside what it can propose.
+Promoter or terminator choice	UNMAPPED	A2 "promoter function in host" is native and always-required, so no promoter is ever proposed.
+Host species change	UNMAPPED	The chassis is defined on S. cerevisiae. Switching host is not a move it can make.
